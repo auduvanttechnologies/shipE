@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Forkroad — Level 1: Entrepreneurship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= HUD (shown during gameplay) ================= -->
+<div id="hud" class="hud hidden">
+  <div class="hud-avatar" id="hudAvatar">
+    <div class="sprite explorer" id="playerSprite">
+      <div class="sprite-head"><div class="sprite-eye l"></div><div class="sprite-eye r"></div></div>
+      <div class="sprite-scarf"></div>
+    </div>
+    <div class="shield-badges" id="shieldBadges"></div>
+  </div>
+  <div class="hud-bars">
+    <div class="bar-label">Health</div>
+    <div class="health-bar-track"><div class="health-bar-fill" id="playerHealthFill"></div></div>
+  </div>
+  <div class="hud-bars boss-bars hidden" id="bossBars">
+    <div class="bar-label">Skeleton King</div>
+    <div class="health-bar-track boss"><div class="health-bar-fill" id="bossHealthFill"></div></div>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- ================= WELCOME ================= -->
+  <section id="screen-welcome" class="screen active">
+    <div class="fork-bg" aria-hidden="true">
+      <div class="fork-side candy"></div>
+      <div class="fork-side forest"></div>
+    </div>
+    <div class="welcome-card">
+      <p class="eyebrow">a game about the road you choose</p>
+      <h1 class="title-huge">FORK<span class="title-accent">ROAD</span></h1>
+      <p class="subtitle">Answer right, skip through candy fields. Answer wrong, survive the storm forest. Either way — you play.</p>
+      <button class="btn btn-primary btn-giant" id="btnPlayNow">Play Now</button>
+    </div>
+  </section>
+
+  <!-- ================= MENU ================= -->
+  <section id="screen-menu" class="screen">
+    <div class="menu-wrap">
+      <p class="eyebrow">choose your road</p>
+      <h2 class="title-large">Level Select</h2>
+      <div class="level-grid">
+        <button class="level-card unlocked" id="btnLevel1" data-level="1">
+          <div class="level-card-badge">Level 1</div>
+          <h3>Entrepreneurship</h3>
+          <p>Revenue, cost, and the choices that make or break a business.</p>
+          <span class="level-card-cta">Start →</span>
+        </button>
+        <div class="level-card locked">
+          <div class="level-card-badge">Level 2</div>
+          <h3>Coming Soon</h3>
+          <p>The road continues...</p>
+          <span class="level-card-cta locked-tag">🔒 Locked</span>
+        </div>
+        <div class="level-card locked">
+          <div class="level-card-badge">Level 3</div>
+          <h3>Coming Soon</h3>
+          <p>The road continues...</p>
+          <span class="level-card-cta locked-tag">🔒 Locked</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEVEL 1 INTRO ================= -->
+  <section id="screen-level-intro" class="screen">
+    <div class="intro-wrap">
+      <p class="eyebrow">level 1</p>
+      <h2 class="title-large">Level 1</h2>
+      <h3 class="title-mid accent">Entrepreneurship</h3>
+      <div class="intro-character">
+        <div class="sprite explorer big" id="introSprite">
+          <div class="sprite-head"><div class="sprite-eye l"></div><div class="sprite-eye r"></div></div>
+          <div class="sprite-scarf"></div>
+          <div class="sprite-body"></div>
+        </div>
+      </div>
+      <p class="intro-copy">Your health bar starts full and green. Wrong answers cost you health. If it ever runs out — you're out of the level. Get from <b>Start</b> to <b>Finish</b> in one piece.</p>
+      <button class="btn btn-primary btn-giant" id="btnStartLevel1">Begin the Road</button>
+    </div>
+  </section>
+
+  <!-- ================= FORK ================= -->
+  <section id="screen-fork" class="screen">
+    <div class="fork-scene">
+      <div class="fork-bg" aria-hidden="true">
+        <div class="fork-side candy"></div>
+        <div class="fork-side forest"></div>
+      </div>
+      <svg class="fork-road" viewBox="0 0 900 500" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M450 500 L450 320" class="road-stem"/>
+        <path d="M450 320 C 300 220, 150 160, 40 60" class="road-branch candy-road"/>
+        <path d="M450 320 C 600 220, 750 160, 860 60" class="road-branch forest-road"/>
+      </svg>
+      <div class="fork-runner" id="forkRunner">
+        <div class="sprite explorer"><div class="sprite-head"><div class="sprite-eye l"></div><div class="sprite-eye r"></div></div><div class="sprite-scarf"></div></div>
+      </div>
+      <div class="question-card fork-question" id="forkQuestionCard">
+        <p class="q-eyebrow">Answer to choose your road</p>
+        <h3 class="q-text" id="forkQText"></h3>
+        <div class="q-options" id="forkQOptions"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CANDYLAND: GARDEN MATCHING ================= -->
+  <section id="screen-candy-garden" class="screen">
+    <div class="scene candy-scene">
+      <p class="eyebrow light">candyland · the garden</p>
+      <h2 class="title-mid">Match every question to its answer</h2>
+      <p class="scene-hint">Press and drag from a question to the matching answer. Correct matches earn a shield. Wrong ones cost health.</p>
+      <div class="match-wrap" id="matchWrap">
+        <svg id="matchSvg" class="match-svg"></svg>
+        <div class="match-col" id="matchQuestions"></div>
+        <div class="match-col" id="matchAnswers"></div>
+      </div>
+      <button class="btn btn-primary hidden" id="btnGardenContinue">Continue to the Quicksand →</button>
+    </div>
+  </section>
+
+  <!-- ================= CANDYLAND: QUICKSAND ================= -->
+  <section id="screen-candy-quicksand" class="screen">
+    <div class="scene quicksand-scene">
+      <p class="eyebrow light">candyland · the quicksand</p>
+      <h2 class="title-mid">You're stuck! Answer to break free</h2>
+      <div class="quicksand-stage">
+        <div class="quicksand-pit"></div>
+        <div class="sprite explorer stuck" id="quicksandSprite"><div class="sprite-head"><div class="sprite-eye l"></div><div class="sprite-eye r"></div></div><div class="sprite-scarf"></div></div>
+        <div class="question-bird" id="questionBird">
+          <div class="bird-body">
+            <div class="bird-wing"></div>
+            <div class="bird-eye"></div>
+            <div class="bird-beak"></div>
+          </div>
+          <div class="bird-textbox">
+            <p class="q-text small" id="birdQText"></p>
+            <div class="q-options" id="birdQOptions"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WIN: CANDY ================= -->
+  <section id="screen-win-candy" class="screen">
+    <div class="win-wrap candy-win">
+      <p class="eyebrow light">level 1 complete</p>
+      <h1 class="title-huge">YOU MADE IT!</h1>
+      <p class="subtitle">You skipped through candyland and reached the finish line in one piece.</p>
+      <div class="win-stats" id="winStatsCandy"></div>
+      <button class="btn btn-primary btn-giant" id="btnCandyMenu">Back to Menu</button>
+    </div>
+  </section>
+
+  <!-- ================= FOREST: DODGE ================= -->
+  <section id="screen-forest-dodge" class="screen">
+    <div class="scene forest-scene">
+      <p class="eyebrow light">dark forest · the thorn path</p>
+      <h2 class="title-mid">Dodge the thorn branches</h2>
+      <p class="scene-hint">Use <b>↑ / ↓</b> (or the buttons) to switch lanes and dodge.</p>
+      <canvas id="dodgeCanvas" width="900" height="420"></canvas>
+      <div class="dodge-controls">
+        <button class="btn btn-secondary" id="btnLaneUp">▲</button>
+        <button class="btn btn-secondary" id="btnLaneDown">▼</button>
+      </div>
+      <div class="dodge-progress-track"><div class="dodge-progress-fill" id="dodgeProgressFill"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= FOREST: POWERUP QUESTIONS ================= -->
+  <section id="screen-forest-questions" class="screen">
+    <div class="scene forest-scene">
+      <p class="eyebrow light">dark forest · gather your strength</p>
+      <h2 class="title-mid" id="forestQTitle">Answer to unlock a power-up</h2>
+      <div class="question-card forest-question">
+        <h3 class="q-text" id="forestQText"></h3>
+        <div class="q-options" id="forestQOptions"></div>
+      </div>
+      <div class="powerup-track" id="powerupTrack">
+        <div class="powerup-chip" id="chipPunch">👊 Super Punch</div>
+        <div class="powerup-chip" id="chipKick">🦵 Super Kick</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOREST: BOSS ================= -->
+  <section id="screen-forest-boss" class="screen">
+    <div class="scene boss-scene">
+      <p class="eyebrow light">dark forest · the clearing</p>
+      <h2 class="title-mid">The Skeleton King blocks the way</h2>
+      <canvas id="bossCanvas" width="900" height="420"></canvas>
+      <div class="boss-hint" id="bossHint">Wait for the wind — then punch or kick to block it. Attack in between to deal damage.</div>
+      <div class="boss-controls">
+        <button class="btn btn-punch" id="btnPunch">👊 Punch (Z)</button>
+        <button class="btn btn-kick" id="btnKick">🦵 Kick (X)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WIN: FOREST ================= -->
+  <section id="screen-win-forest" class="screen">
+    <div class="win-wrap forest-win">
+      <p class="eyebrow light">level 1 complete</p>
+      <h1 class="title-huge">THE KING FALLS!</h1>
+      <p class="subtitle">You survived the storm forest and defeated the Skeleton King.</p>
+      <div class="win-stats" id="winStatsForest"></div>
+      <button class="btn btn-primary btn-giant" id="btnForestMenu">Back to Menu</button>
+    </div>
+  </section>
+
+  <!-- ================= GAME OVER ================= -->
+  <section id="screen-gameover" class="screen">
+    <div class="win-wrap gameover">
+      <p class="eyebrow light">out of health</p>
+      <h1 class="title-huge">THE ROAD WINS THIS TIME</h1>
+      <p class="subtitle" id="gameoverReason">Your health ran out before you reached the finish.</p>
+      <button class="btn btn-primary btn-giant" id="btnRetry">Try Again</button>
+      <button class="btn btn-secondary" id="btnGameoverMenu">Back to Menu</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
