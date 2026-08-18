@@ -400,3 +400,65 @@ button:focus-visible, .match-node:focus-visible{
   outline: 3px solid var(--candy-lemon);
   outline-offset: 2px;
 }
+
+/* =========================================================
+   HUD NAVIGATION
+   ========================================================= */
+.hud-nav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.hud-btn{
+  border:2px solid rgba(255,255,255,.14);
+  border-radius:12px;
+  background:rgba(255,255,255,.07);
+  color:var(--parchment);
+  padding:8px 11px;
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:.82rem;
+  transition:transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.hud-btn:hover{
+  transform:translateY(-2px);
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,255,255,.28);
+}
+.hud-btn:active{ transform:translateY(1px); }
+
+.legal-note{
+  max-width:560px;
+  margin-top:12px;
+  color:#AFA4C8;
+  font-size:.72rem;
+  line-height:1.4;
+  font-style:italic;
+}
+
+.level-two-card{
+  border-color:rgba(76,224,179,.25);
+}
+.level-two-card:hover{
+  border-color:var(--candy-mint);
+}
+
+@media (max-width:640px){
+  .hud{
+    gap:8px;
+  }
+  .hud-nav{
+    gap:5px;
+  }
+  .hud-btn{
+    padding:7px 8px;
+    font-size:.75rem;
+  }
+  .hud-btn span{
+    display:none;
+  }
+  .hud-bars{
+    min-width:0;
+  }
+}
