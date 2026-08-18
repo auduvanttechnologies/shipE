@@ -13,6 +13,10 @@
 
 <!-- ================= HUD (shown during gameplay) ================= -->
 <div id="hud" class="hud hidden">
+  <div class="hud-nav">
+    <button class="hud-btn" id="btnHome" title="Return to title screen">⌂ <span>Home</span></button>
+    <button class="hud-btn" id="btnMenu" title="Return to level select">☰ <span>Menu</span></button>
+  </div>
   <div class="hud-avatar" id="hudAvatar">
     <div class="sprite explorer" id="playerSprite">
       <div class="sprite-head"><div class="sprite-eye l"></div><div class="sprite-eye r"></div></div>
@@ -54,16 +58,16 @@
       <div class="level-grid">
         <button class="level-card unlocked" id="btnLevel1" data-level="1">
           <div class="level-card-badge">Level 1</div>
-          <h3>Basics</h3>
+          <h3>Entrepreneurship</h3>
           <p>Revenue, cost, and the choices that make or break a business.</p>
           <span class="level-card-cta">Start →</span>
         </button>
-        <div class="level-card locked">
+        <button class="level-card unlocked level-two-card" id="btnLevel2" data-level="2">
           <div class="level-card-badge">Level 2</div>
-          <h3>Coming Soon</h3>
-          <p>The road continues...</p>
-          <span class="level-card-cta locked-tag">🔒 Locked</span>
-        </div>
+          <h3>Running a Business</h3>
+          <p>Operations, management, costs, and finance — the systems behind the business.</p>
+          <span class="level-card-cta">Start →</span>
+        </button>
         <div class="level-card locked">
           <div class="level-card-badge">Level 3</div>
           <h3>Coming Soon</h3>
@@ -79,7 +83,7 @@
     <div class="intro-wrap">
       <p class="eyebrow">level 1</p>
       <h2 class="title-large">Level 1</h2>
-      <h3 class="title-mid accent">Entrepreneurship</h3>
+      <h3 class="title-mid accent" id="levelIntroTitle">Entrepreneurship</h3>
       <div class="intro-character">
         <div class="sprite explorer big" id="introSprite">
           <div class="sprite-head"><div class="sprite-eye l"></div><div class="sprite-eye r"></div></div>
@@ -87,8 +91,9 @@
           <div class="sprite-body"></div>
         </div>
       </div>
-      <p class="intro-copy">Your health bar starts full and green. Wrong answers cost you health. If it ever runs out — you're out of the level. Get from <b>Start</b> to <b>Finish</b> in one piece.</p>
-      <button class="btn btn-primary btn-giant" id="btnStartLevel1">Begin the Road</button>
+      <p class="intro-copy" id="levelIntroCopy">Your health bar starts full and green. Wrong answers cost you health. If it ever runs out — you're out of the level. Get from <b>Start</b> to <b>Finish</b> in one piece.</p>
+      <p class="legal-note" id="levelIntroNote"></p>
+      <button class="btn btn-primary btn-giant" id="btnStartLevel">Begin the Road</button>
     </div>
   </section>
 
@@ -156,9 +161,9 @@
   <!-- ================= WIN: CANDY ================= -->
   <section id="screen-win-candy" class="screen">
     <div class="win-wrap candy-win">
-      <p class="eyebrow light">level 1 complete</p>
-      <h1 class="title-huge">YOU MADE IT!</h1>
-      <p class="subtitle">You skipped through candyland and reached the finish line in one piece.</p>
+      <p class="eyebrow light" id="candyWinEyebrow">level 1 complete</p>
+      <h1 class="title-huge" id="candyWinTitle">YOU MADE IT!</h1>
+      <p class="subtitle" id="candyWinSubtitle">You skipped through candyland and reached the finish line in one piece.</p>
       <div class="win-stats" id="winStatsCandy"></div>
       <button class="btn btn-primary btn-giant" id="btnCandyMenu">Back to Menu</button>
     </div>
@@ -212,9 +217,9 @@
   <!-- ================= WIN: FOREST ================= -->
   <section id="screen-win-forest" class="screen">
     <div class="win-wrap forest-win">
-      <p class="eyebrow light">level 1 complete</p>
-      <h1 class="title-huge">THE KING FALLS!</h1>
-      <p class="subtitle">You survived the storm forest and defeated the Skeleton King.</p>
+      <p class="eyebrow light" id="forestWinEyebrow">level 1 complete</p>
+      <h1 class="title-huge" id="forestWinTitle">THE KING FALLS!</h1>
+      <p class="subtitle" id="forestWinSubtitle">You survived the storm forest and defeated the Skeleton King.</p>
       <div class="win-stats" id="winStatsForest"></div>
       <button class="btn btn-primary btn-giant" id="btnForestMenu">Back to Menu</button>
     </div>
