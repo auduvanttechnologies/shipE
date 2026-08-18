@@ -217,6 +217,54 @@ p{ margin:0; }
   backdrop-filter: blur(6px);
   border-bottom: 2px solid rgba(255,255,255,.08);
 }
+.hud-nav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+
+.hud-btn{
+  border:2px solid rgba(255,255,255,.15);
+  background:var(--ink-night-2);
+  color:var(--parchment);
+  border-radius:999px;
+  padding:8px 12px;
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:.85rem;
+  line-height:1;
+  cursor:pointer;
+  transition:transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.hud-btn:hover{
+  background:#302451;
+  border-color:var(--candy-pink);
+  transform:translateY(-1px);
+}
+
+.hud-btn:active{
+  transform:translateY(1px);
+}
+
+.hud-btn span{
+  margin-left:4px;
+}
+
+@media (max-width:640px){
+  .hud-nav{
+    gap:5px;
+  }
+
+  .hud-btn{
+    padding:8px 9px;
+  }
+
+  .hud-btn span{
+    display:none;
+  }
+}
 .hud-avatar{ position:relative; flex-shrink:0; transform:scale(.6); transform-origin:left center; }
 .shield-badges{ position:absolute; top:-6px; right:-14px; display:flex; flex-direction:column; gap:2px; }
 .shield-badge{
