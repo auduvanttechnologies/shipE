@@ -20,8 +20,10 @@
 <body>
 
 <!-- =========================================================
-     HUD — SHOWN DURING GAMEPLAY
+     EXISTING HUD
+     Used by Levels 1 and 2
      ========================================================= -->
+
 <div id="hud" class="hud hidden">
 
   <div class="hud-nav">
@@ -57,10 +59,7 @@
 
     </div>
 
-    <div
-      class="shield-badges"
-      id="shieldBadges"
-    ></div>
+    <div class="shield-badges" id="shieldBadges"></div>
 
   </div>
 
@@ -106,8 +105,9 @@
 
 
 <!-- =========================================================
-     WELCOME / TITLE SCREEN
+     WELCOME
      ========================================================= -->
+
 <section
   id="screen-welcome"
   class="screen active"
@@ -122,7 +122,6 @@
     <div class="fork-side forest"></div>
 
   </div>
-
 
   <div class="welcome-card">
 
@@ -153,8 +152,9 @@
 
 
 <!-- =========================================================
-     LEVEL SELECT / MAIN MENU
+     LEVEL SELECT
      ========================================================= -->
+
 <section
   id="screen-menu"
   class="screen"
@@ -174,7 +174,8 @@
     <div class="level-grid">
 
 
-      <!-- LEVEL 1 -->
+      <!-- ================= LEVEL 1 ================= -->
+
       <button
         class="level-card unlocked"
         id="btnLevel1"
@@ -190,8 +191,7 @@
         </h3>
 
         <p>
-          Revenue, cost, and the choices that
-          make or break a business.
+          Revenue, cost, and the choices that make or break a business.
         </p>
 
         <span class="level-card-cta">
@@ -201,7 +201,8 @@
       </button>
 
 
-      <!-- LEVEL 2 -->
+      <!-- ================= LEVEL 2 ================= -->
+
       <button
         class="level-card unlocked level-two-card"
         id="btnLevel2"
@@ -217,9 +218,8 @@
         </h3>
 
         <p>
-          Operations, management, costs,
-          and finance — the systems behind
-          the business.
+          Operations, management, costs, and finance —
+          the systems behind the business.
         </p>
 
         <span class="level-card-cta">
@@ -229,35 +229,39 @@
       </button>
 
 
-      <!-- LEVEL 3 -->
-      <div class="level-card locked">
+      <!-- ================= LEVEL 3 ================= -->
+
+      <button
+        class="level-card unlocked level-three-card"
+        id="btnLevel3"
+        data-level="3"
+      >
 
         <div class="level-card-badge">
           Level 3
         </div>
 
         <h3>
-          Coming Soon
+          Funding
         </h3>
 
         <p>
-          The road continues...
+          Build a company, raise capital, make decisions,
+          survive ten years, and beat the competition.
         </p>
 
-        <span class="level-card-cta locked-tag">
-          🔒 Locked
+        <span class="level-card-cta">
+          Start →
         </span>
 
-      </div>
+      </button>
 
 
     </div>
 
 
-    <!-- =====================================================
-         LEVEL SELECT BUTTONS
-         These are separate from the gameplay HUD buttons.
-         ===================================================== -->
+    <!-- HOME / MENU BUTTONS ON LEVEL SELECT -->
+
     <div class="menu-actions">
 
       <button
@@ -269,9 +273,9 @@
 
       <button
         class="btn btn-secondary"
-        id="btnMenuPage"
+        id="btnMenuRefresh"
       >
-        ☰ Menu
+        ↻ Level Select
       </button>
 
     </div>
@@ -282,8 +286,10 @@
 
 
 <!-- =========================================================
-     LEVEL INTRO
+     LEVEL 1 / LEVEL 2 INTRO
+     Existing system
      ========================================================= -->
+
 <section
   id="screen-level-intro"
   class="screen"
@@ -291,22 +297,13 @@
 
   <div class="intro-wrap">
 
-
-    <p
-      class="eyebrow"
-      id="levelIntroEyebrow"
-    >
-      level 1
+    <p class="eyebrow">
+      level <span id="introLevelNumber">1</span>
     </p>
 
-
-    <h2
-      class="title-large"
-      id="levelIntroNumber"
-    >
-      Level 1
+    <h2 class="title-large">
+      Level <span id="introLevelNumberLarge">1</span>
     </h2>
-
 
     <h3
       class="title-mid accent"
@@ -363,6 +360,95 @@
       Begin the Road
     </button>
 
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     LEVEL 3 — INTRO
+     ========================================================= -->
+
+<section
+  id="screen-level3-intro"
+  class="screen"
+>
+
+  <div class="funding-intro-wrap">
+
+    <p class="eyebrow">
+      level 3
+    </p>
+
+    <h1 class="title-large">
+      Funding
+    </h1>
+
+    <h2 class="title-mid accent">
+      Choose Your Story
+    </h2>
+
+
+    <div class="funding-intro-character">
+
+      <div
+        class="sprite explorer big"
+        id="fundingIntroSprite"
+      >
+
+        <div class="sprite-head">
+
+          <div class="sprite-eye l"></div>
+          <div class="sprite-eye r"></div>
+
+        </div>
+
+        <div class="sprite-scarf"></div>
+
+        <div class="sprite-body"></div>
+
+      </div>
+
+    </div>
+
+
+    <p class="funding-intro-copy">
+
+      You've just been accepted into
+      <b>Startup School</b>.
+
+      You have funding, a cofounder,
+      ten years, and one chance to build
+      a company that beats the competition.
+
+    </p>
+
+
+    <p class="funding-intro-copy">
+
+      Every decision changes your company.
+      Some consequences appear immediately.
+
+      Others may not appear until years later.
+
+    </p>
+
+
+    <div class="funding-intro-note">
+
+      <b>Choose carefully.</b>
+
+      Your company remembers what you do.
+
+    </div>
+
+
+    <button
+      class="btn btn-primary btn-giant"
+      id="btnStartFunding"
+    >
+      Begin Your Story
+    </button>
 
   </div>
 
@@ -370,15 +456,1413 @@
 
 
 <!-- =========================================================
-     FORK
+     LEVEL 3 — TECH / NON-TECH CHOICE
      ========================================================= -->
+
+<section
+  id="screen-funding-type"
+  class="screen"
+>
+
+  <div class="funding-choice-wrap">
+
+    <p class="eyebrow">
+      your first decision
+    </p>
+
+    <h1 class="title-large">
+      What kind of company will you build?
+    </h1>
+
+    <p class="scene-hint">
+      This choice determines the industries,
+      starting conditions, challenges, and opportunities
+      you will face.
+    </p>
+
+
+    <div class="funding-type-grid">
+
+
+      <button
+        class="funding-type-card"
+        id="btnFundingTech"
+        data-funding-type="tech"
+      >
+
+        <div class="funding-type-icon">
+          💻
+        </div>
+
+        <h2>
+          Tech Startup
+        </h2>
+
+        <p>
+          Build a technology-driven company
+          and compete in a fast-moving market.
+        </p>
+
+        <span>
+          Choose Tech →
+        </span>
+
+      </button>
+
+
+      <button
+        class="funding-type-card"
+        id="btnFundingNonTech"
+        data-funding-type="nontech"
+      >
+
+        <div class="funding-type-icon">
+          🏗️
+        </div>
+
+        <h2>
+          Non-Tech Startup
+        </h2>
+
+        <p>
+          Build a company in construction,
+          services, advertising, or manufacturing.
+        </p>
+
+        <span>
+          Choose Non-Tech →
+        </span>
+
+      </button>
+
+
+    </div>
+
+
+    <p class="funding-fine-print">
+      This level uses the United States startup,
+      investment, lending, and tax environment
+      as its general setting.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     LEVEL 3 — INDUSTRY SPINNER
+     ========================================================= -->
+
+<section
+  id="screen-funding-spinner"
+  class="screen"
+>
+
+  <div class="spinner-wrap">
+
+    <p class="eyebrow">
+      startup school
+    </p>
+
+    <h1 class="title-large">
+      Your Industry
+    </h1>
+
+    <p class="scene-hint">
+      You don't get to choose.
+      The market chooses for you.
+    </p>
+
+
+    <div
+      class="industry-spinner"
+      id="industrySpinner"
+    >
+
+      <div
+        class="spinner-pointer"
+        aria-hidden="true"
+      >
+        ▼
+      </div>
+
+      <div
+        class="spinner-wheel"
+        id="industrySpinnerWheel"
+      >
+
+        <div class="spinner-wheel-center">
+          ?
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="spinner-result hidden"
+      id="industrySpinnerResult"
+    >
+
+      <p class="eyebrow">
+        your company
+      </p>
+
+      <h2
+        class="title-mid"
+        id="industryResultTitle"
+      >
+        Industry
+      </h2>
+
+      <p
+        class="scene-hint"
+        id="industryResultDescription"
+      ></p>
+
+    </div>
+
+
+    <button
+      class="btn btn-primary btn-giant"
+      id="btnSpinIndustry"
+    >
+      Spin
+    </button>
+
+
+    <button
+      class="btn btn-secondary hidden"
+      id="btnContinueAfterSpin"
+    >
+      Continue →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     LEVEL 3 — FOUNDING / YEAR 1 START
+     ========================================================= -->
+
+<section
+  id="screen-funding-foundation"
+  class="screen"
+>
+
+  <div class="funding-foundation-wrap">
+
+    <p class="eyebrow">
+      startup school · year 1
+    </p>
+
+    <h1 class="title-large">
+      You're Funded.
+    </h1>
+
+
+    <div class="foundation-dialog">
+
+      <div class="dialog-character">
+
+        <div class="sprite explorer big">
+
+          <div class="sprite-head">
+            <div class="sprite-eye l"></div>
+            <div class="sprite-eye r"></div>
+          </div>
+
+          <div class="sprite-scarf"></div>
+          <div class="sprite-body"></div>
+
+        </div>
+
+      </div>
+
+
+      <div class="dialog-content">
+
+        <p class="dialog-speaker">
+          STARTUP SCHOOL
+        </p>
+
+        <p id="foundationDialogText">
+
+          Congratulations.
+
+          Startup School has invested
+          <b>$100,000</b> in your company.
+
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="foundation-stats">
+
+      <div class="foundation-stat">
+
+        <span>
+          Funding
+        </span>
+
+        <strong>
+          $100,000
+        </strong>
+
+        <small>
+          Pre-seed
+        </small>
+
+      </div>
+
+
+      <div class="foundation-stat">
+
+        <span>
+          Team
+        </span>
+
+        <strong>
+          2 founders
+        </strong>
+
+        <small id="foundationTeamDescription">
+          You + cofounder
+        </small>
+
+      </div>
+
+
+      <div class="foundation-stat">
+
+        <span>
+          Ownership
+        </span>
+
+        <strong>
+          50 / 50
+        </strong>
+
+        <small>
+          Founder split
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="funding-explainer">
+
+      <h3>
+        What is pre-seed funding?
+      </h3>
+
+      <p>
+
+        Pre-seed funding is early-stage capital used
+        to help a startup turn an idea into a real business.
+
+        It can pay for things such as product development,
+        early employees, research, equipment, and customer acquisition.
+
+      </p>
+
+    </div>
+
+
+    <button
+      class="btn btn-primary btn-giant"
+      id="btnEnterYear1"
+    >
+      Enter Year 1 →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     LEVEL 3 — MAIN SIMULATOR
+     ========================================================= -->
+
+<section
+  id="screen-funding-simulator"
+  class="screen funding-simulator-screen"
+>
+
+
+  <!-- =======================================================
+       TOP BAR
+       ======================================================= -->
+
+  <div class="funding-topbar">
+
+
+    <div class="funding-topbar-left">
+
+      <button
+        class="funding-nav-btn"
+        id="btnFundingHome"
+        title="Return to title screen"
+      >
+        ⌂
+      </button>
+
+      <button
+        class="funding-nav-btn"
+        id="btnFundingMenu"
+        title="Return to level select"
+      >
+        ☰
+      </button>
+
+    </div>
+
+
+    <div class="funding-year-display">
+
+      <span>
+        YEAR
+      </span>
+
+      <strong id="fundingYearNumber">
+        1
+      </strong>
+
+      <span>
+        OF 10
+      </span>
+
+    </div>
+
+
+    <div class="funding-topbar-right">
+
+      <span class="funding-industry-label">
+        Industry:
+      </span>
+
+      <strong id="fundingIndustryTop">
+        —
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       TEN YEAR PROGRESS BAR
+       ======================================================= -->
+
+  <div class="funding-year-progress">
+
+    <div
+      class="funding-year-progress-track"
+      id="fundingYearProgress"
+    >
+
+      <div
+        class="funding-year-progress-fill"
+        id="fundingYearProgressFill"
+      ></div>
+
+
+      <div class="funding-year-boxes">
+
+        <span data-year="1">1</span>
+        <span data-year="2">2</span>
+        <span data-year="3">3</span>
+        <span data-year="4">4</span>
+        <span data-year="5">5</span>
+        <span data-year="6">6</span>
+        <span data-year="7">7</span>
+        <span data-year="8">8</span>
+        <span data-year="9">9</span>
+        <span data-year="10">10</span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       MAIN FUNDING LAYOUT
+       ======================================================= -->
+
+  <div class="funding-layout">
+
+
+    <!-- =====================================================
+         LEFT COMPANY PANEL
+         ===================================================== -->
+
+    <aside class="funding-sidebar">
+
+
+      <div class="company-panel">
+
+        <p class="company-panel-label">
+          YOUR COMPANY
+        </p>
+
+        <h2 id="companyIndustry">
+          Startup
+        </h2>
+
+        <p
+          class="company-type-label"
+          id="companyTypeLabel"
+        >
+          Tech Startup
+        </p>
+
+
+        <div class="company-value-block">
+
+          <span>
+            COMPANY VALUE
+          </span>
+
+          <strong id="playerCompanyValue">
+            $100K
+          </strong>
+
+        </div>
+
+
+        <div class="company-metric">
+
+          <div>
+            <span>
+              Cash
+            </span>
+
+            <strong id="playerCash">
+              $100K
+            </strong>
+          </div>
+
+          <div class="metric-bar">
+            <div
+              id="cashMetricFill"
+              class="metric-bar-fill"
+            ></div>
+          </div>
+
+        </div>
+
+
+        <div class="company-metric">
+
+          <div>
+            <span>
+              Revenue
+            </span>
+
+            <strong id="playerRevenue">
+              $0
+            </strong>
+          </div>
+
+        </div>
+
+
+        <div class="company-metric">
+
+          <div>
+            <span>
+              Users
+            </span>
+
+            <strong id="playerUsers">
+              0
+            </strong>
+          </div>
+
+        </div>
+
+
+        <div class="company-metric">
+
+          <div>
+            <span>
+              Market Share
+            </span>
+
+            <strong id="playerMarketShare">
+              0%
+            </strong>
+          </div>
+
+          <div class="metric-bar">
+
+            <div
+              id="marketShareFill"
+              class="metric-bar-fill"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <div class="company-metric">
+
+          <div>
+            <span>
+              Reputation
+            </span>
+
+            <strong id="playerReputation">
+              50
+            </strong>
+
+          </div>
+
+          <div class="metric-bar">
+
+            <div
+              id="reputationFill"
+              class="metric-bar-fill"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <div class="company-metric">
+
+          <div>
+            <span>
+              Runway
+            </span>
+
+            <strong id="playerRunway">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- ================================================
+           COFOUNDER
+           ================================================ -->
+
+      <div class="cofounder-panel">
+
+        <p class="company-panel-label">
+          COFOUNDER
+        </p>
+
+        <h3 id="cofounderName">
+          Your Cofounder
+        </h3>
+
+        <p id="cofounderRole">
+          Cofounder
+        </p>
+
+        <div class="cofounder-status">
+
+          <span>
+            Ownership
+          </span>
+
+          <strong id="cofounderOwnership">
+            50%
+          </strong>
+
+        </div>
+
+        <div
+          class="cofounder-status"
+          id="cofounderStatus"
+        >
+
+          <span>
+            Status
+          </span>
+
+          <strong>
+            Active
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================
+           VALUE PIE CHART
+           ================================================ -->
+
+      <div class="value-panel">
+
+        <p class="company-panel-label">
+          MARKET VALUE
+        </p>
+
+
+        <div class="value-pie-wrap">
+
+          <div
+            class="value-pie"
+            id="playerValuePie"
+          >
+
+            <div class="value-pie-hole">
+              <strong id="valuePieLabel">
+                $100K
+              </strong>
+
+              <span>
+                VALUE
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="value-change">
+
+          <span>
+            Change
+          </span>
+
+          <strong id="playerValueChange">
+            +0%
+          </strong>
+
+        </div>
+
+      </div>
+
+
+    </aside>
+
+
+    <!-- =====================================================
+         CENTER GAME AREA
+         ===================================================== -->
+
+    <main class="funding-main">
+
+
+      <!-- ================================================
+           YEAR EVENT / DIALOG
+           ================================================ -->
+
+      <div
+        class="funding-event-card"
+        id="fundingEventCard"
+      >
+
+        <div class="event-card-header">
+
+          <span id="fundingEventEyebrow">
+            YEAR 1
+          </span>
+
+          <span id="fundingEventTag">
+            EVENT
+          </span>
+
+        </div>
+
+
+        <h1 id="fundingEventTitle">
+          Build the Company
+        </h1>
+
+
+        <p id="fundingEventText">
+
+          Your startup has received
+          $100,000 in pre-seed funding.
+
+          What will you do with it?
+
+        </p>
+
+      </div>
+
+
+      <!-- ================================================
+           DIALOG OVERLAY
+           ================================================ -->
+
+      <div
+        class="funding-dialog hidden"
+        id="fundingDialog"
+      >
+
+        <div class="funding-dialog-character">
+
+          <div class="sprite explorer">
+
+            <div class="sprite-head">
+
+              <div class="sprite-eye l"></div>
+              <div class="sprite-eye r"></div>
+
+            </div>
+
+            <div class="sprite-scarf"></div>
+
+          </div>
+
+        </div>
+
+
+        <div class="funding-dialog-box">
+
+          <p
+            class="dialog-speaker"
+            id="fundingDialogSpeaker"
+          >
+            NARRATOR
+          </p>
+
+          <p
+            id="fundingDialogText"
+          ></p>
+
+          <button
+            class="btn btn-primary"
+            id="btnFundingDialogContinue"
+          >
+            Continue →
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================
+           DECISION CARDS
+           ================================================ -->
+
+      <div
+        class="funding-decision-header"
+        id="fundingDecisionHeader"
+      >
+
+        <h2>
+          What will you do?
+        </h2>
+
+        <p>
+          Your choices affect the future of your company.
+        </p>
+
+      </div>
+
+
+      <div
+        class="funding-card-grid"
+        id="fundingDecisionCards"
+      >
+
+
+        <!-- Product -->
+
+        <button
+          class="funding-decision-card"
+          data-action="product"
+        >
+
+          <div class="funding-card-icon">
+            🛠️
+          </div>
+
+          <h3>
+            Develop Product
+          </h3>
+
+          <p>
+            Build a new feature or improve
+            the company's core product.
+          </p>
+
+          <div class="funding-card-footer">
+            <span>
+              Cost
+            </span>
+
+            <strong>
+              $25K
+            </strong>
+          </div>
+
+        </button>
+
+
+        <!-- Marketing -->
+
+        <button
+          class="funding-decision-card"
+          data-action="marketing"
+        >
+
+          <div class="funding-card-icon">
+            📣
+          </div>
+
+          <h3>
+            Invest in Marketing
+          </h3>
+
+          <p>
+            Increase awareness and acquire
+            new customers.
+          </p>
+
+          <div class="funding-card-footer">
+            <span>
+              Cost
+            </span>
+
+            <strong>
+              $20K
+            </strong>
+          </div>
+
+        </button>
+
+
+        <!-- Expansion -->
+
+        <button
+          class="funding-decision-card"
+          data-action="expansion"
+        >
+
+          <div class="funding-card-icon">
+            🏢
+          </div>
+
+          <h3>
+            Expand
+          </h3>
+
+          <p>
+            Open a new office or headquarters
+            location.
+          </p>
+
+          <div class="funding-card-footer">
+            <span>
+              Cost
+            </span>
+
+            <strong>
+              $35K
+            </strong>
+          </div>
+
+        </button>
+
+
+        <!-- R&D -->
+
+        <button
+          class="funding-decision-card"
+          data-action="rd"
+        >
+
+          <div class="funding-card-icon">
+            🔬
+          </div>
+
+          <h3>
+            Invest in R&D
+          </h3>
+
+          <p>
+            Spend now on research that may
+            create major gains later.
+          </p>
+
+          <div class="funding-card-footer">
+            <span>
+              Cost
+            </span>
+
+            <strong>
+              $30K
+            </strong>
+          </div>
+
+        </button>
+
+
+        <!-- High salary -->
+
+        <button
+          class="funding-decision-card"
+          data-action="salary"
+        >
+
+          <div class="funding-card-icon">
+            💵
+          </div>
+
+          <h3>
+            High Salaries
+          </h3>
+
+          <p>
+            Pay yourself and your team
+            above-market compensation.
+          </p>
+
+          <div class="funding-card-footer">
+            <span>
+              Cost
+            </span>
+
+            <strong>
+              $20K
+            </strong>
+          </div>
+
+        </button>
+
+
+        <!-- Personal spending -->
+
+        <div
+          class="funding-decision-card personal-spending-card"
+        >
+
+          <div class="funding-card-icon">
+            💎
+          </div>
+
+          <h3>
+            Spend Investor Money on Yourself
+          </h3>
+
+          <p>
+            Take money from the company
+            for personal spending.
+          </p>
+
+
+          <div class="personal-spending-options">
+
+            <button
+              class="personal-spend-btn"
+              data-spend="10"
+            >
+              10%
+            </button>
+
+            <button
+              class="personal-spend-btn"
+              data-spend="50"
+            >
+              50%
+            </button>
+
+            <button
+              class="personal-spend-btn danger-choice"
+              data-spend="100"
+            >
+              100%
+            </button>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- ================================================
+           YEAR TIMER
+           ================================================ -->
+
+      <div class="funding-year-timer">
+
+        <div class="timer-header">
+
+          <span>
+            Time remaining
+          </span>
+
+          <strong id="fundingTimerText">
+            2:00
+          </strong>
+
+        </div>
+
+        <div class="timer-track">
+
+          <div
+            class="timer-fill"
+            id="fundingTimerFill"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================
+           YEAR EXPLANATION
+           ================================================ -->
+
+      <div
+        class="funding-bottom-explanation"
+        id="fundingBottomExplanation"
+      >
+
+        <h3>
+          Pre-seed funding
+        </h3>
+
+        <p>
+
+          Pre-seed funding is capital provided
+          at the earliest stage of a startup.
+
+          It is generally used to develop the idea,
+          build an initial product, assemble a team,
+          and test whether customers actually want it.
+
+        </p>
+
+      </div>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         RIGHT COMPETITOR PANEL
+         ===================================================== -->
+
+    <aside class="funding-competitor">
+
+
+      <div class="competitor-panel">
+
+        <p class="company-panel-label">
+          LEADERBOARD
+        </p>
+
+        <h2>
+          COMPUTER
+        </h2>
+
+        <p>
+          Rival Company
+        </p>
+
+
+        <div class="competitor-value">
+
+          <span>
+            COMPANY VALUE
+          </span>
+
+          <strong id="computerCompanyValue">
+            $100K
+          </strong>
+
+        </div>
+
+
+        <div class="competitor-rank">
+
+          <span>
+            YOUR RANK
+          </span>
+
+          <strong id="playerRank">
+            #1
+          </strong>
+
+        </div>
+
+
+        <div class="competitor-gap">
+
+          <span>
+            VALUE GAP
+          </span>
+
+          <strong id="valueGap">
+            $0
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="competitor-mini-chart">
+
+        <p class="company-panel-label">
+          COMPUTER VALUE
+        </p>
+
+        <div
+          class="computer-value-pie"
+          id="computerValuePie"
+        >
+
+          <div class="value-pie-hole">
+
+            <strong id="computerPieLabel">
+              $100K
+            </strong>
+
+            <span>
+              VALUE
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </aside>
+
+
+  </div>
+
+
+</section>
+
+
+<!-- =========================================================
+     LEVEL 3 — YEAR EVENT DIALOG
+     Standalone event screen for major surprises
+     ========================================================= -->
+
+<section
+  id="screen-funding-event"
+  class="screen"
+>
+
+  <div class="funding-major-event-wrap">
+
+    <p
+      class="eyebrow"
+      id="majorEventEyebrow"
+    >
+      YEAR 2
+    </p>
+
+    <h1
+      class="title-large"
+      id="majorEventTitle"
+    >
+      Surprise
+    </h1>
+
+
+    <div class="major-event-dialog">
+
+      <div class="major-event-character">
+
+        <div class="sprite explorer big">
+
+          <div class="sprite-head">
+
+            <div class="sprite-eye l"></div>
+            <div class="sprite-eye r"></div>
+
+          </div>
+
+          <div class="sprite-scarf"></div>
+
+          <div class="sprite-body"></div>
+
+        </div>
+
+      </div>
+
+
+      <div class="major-event-content">
+
+        <p
+          class="dialog-speaker"
+          id="majorEventSpeaker"
+        >
+          NARRATOR
+        </p>
+
+        <p
+          id="majorEventText"
+        >
+          Something unexpected happened.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="major-event-choices"
+      id="majorEventChoices"
+    ></div>
+
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     LEVEL 3 — YEAR 10 FINISH
+     ========================================================= -->
+
+<section
+  id="screen-funding-finish"
+  class="screen"
+>
+
+  <div class="funding-finish-wrap">
+
+    <p class="eyebrow">
+      ten years later
+    </p>
+
+    <h1 class="title-huge">
+      THE FINISH LINE
+    </h1>
+
+    <p class="subtitle">
+      The road ends here.
+      Now we find out who built the better company.
+    </p>
+
+
+    <div class="final-comparison">
+
+
+      <div class="final-company-card player-final">
+
+        <p>
+          YOU
+        </p>
+
+        <strong id="finalPlayerValue">
+          $0
+        </strong>
+
+        <span>
+          Final Company Value
+        </span>
+
+      </div>
+
+
+      <div class="final-vs">
+        VS
+      </div>
+
+
+      <div class="final-company-card computer-final">
+
+        <p>
+          COMPUTER
+        </p>
+
+        <strong id="finalComputerValue">
+          $0
+        </strong>
+
+        <span>
+          Final Company Value
+        </span>
+
+      </div>
+
+
+    </div>
+
+
+    <div
+      class="final-result"
+      id="finalResult"
+    >
+
+      <h2 id="finalResultTitle">
+        —
+      </h2>
+
+      <p id="finalResultText">
+        —
+      </p>
+
+    </div>
+
+
+    <div
+      class="final-stat-grid"
+      id="finalStatGrid"
+    ></div>
+
+
+    <button
+      class="btn btn-primary btn-giant"
+      id="btnFundingFinishMenu"
+    >
+      Back to Level Select
+    </button>
+
+
+    <button
+      class="btn btn-secondary"
+      id="btnFundingPlayAgain"
+    >
+      Play Again
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     EXISTING LEVEL 1/2 FORK
+     ========================================================= -->
+
 <section
   id="screen-fork"
   class="screen"
 >
 
   <div class="fork-scene">
-
 
     <div
       class="fork-bg"
@@ -424,10 +1908,8 @@
       <div class="sprite explorer">
 
         <div class="sprite-head">
-
           <div class="sprite-eye l"></div>
           <div class="sprite-eye r"></div>
-
         </div>
 
         <div class="sprite-scarf"></div>
@@ -458,15 +1940,15 @@
 
     </div>
 
-
   </div>
 
 </section>
 
 
 <!-- =========================================================
-     CANDYLAND — GARDEN MATCHING
+     CANDYLAND — GARDEN
      ========================================================= -->
+
 <section
   id="screen-candy-garden"
   class="screen"
@@ -483,8 +1965,8 @@
     </h2>
 
     <p class="scene-hint">
-      Press and drag from a question to the matching
-      answer. Correct matches earn a shield.
+      Press and drag from a question to the matching answer.
+      Correct matches earn a shield.
       Wrong ones cost health.
     </p>
 
@@ -527,6 +2009,7 @@
 <!-- =========================================================
      CANDYLAND — QUICKSAND
      ========================================================= -->
+
 <section
   id="screen-candy-quicksand"
   class="screen"
@@ -554,10 +2037,8 @@
       >
 
         <div class="sprite-head">
-
           <div class="sprite-eye l"></div>
           <div class="sprite-eye r"></div>
-
         </div>
 
         <div class="sprite-scarf"></div>
@@ -605,6 +2086,7 @@
 <!-- =========================================================
      WIN — CANDY
      ========================================================= -->
+
 <section
   id="screen-win-candy"
   class="screen"
@@ -630,8 +2112,8 @@
       class="subtitle"
       id="candyWinSubtitle"
     >
-      You skipped through candyland and
-      reached the finish line in one piece.
+      You skipped through candyland
+      and reached the finish line in one piece.
     </p>
 
     <div
@@ -654,6 +2136,7 @@
 <!-- =========================================================
      FOREST — DODGE
      ========================================================= -->
+
 <section
   id="screen-forest-dodge"
   class="screen"
@@ -662,16 +2145,17 @@
   <div class="scene forest-scene">
 
     <p class="eyebrow light">
-      dark forest · dodge the thorns
+      dark forest · the thorn path
     </p>
 
     <h2 class="title-mid">
-      Survive the forest
+      Dodge the thorn branches
     </h2>
 
     <p class="scene-hint">
-      Move between the three lanes and avoid
-      the thorny branches.
+      Use <b>↑ / ↓</b>
+      (or the buttons)
+      to switch lanes and dodge.
     </p>
 
 
@@ -680,6 +2164,25 @@
       width="900"
       height="420"
     ></canvas>
+
+
+    <div class="dodge-controls">
+
+      <button
+        class="btn btn-secondary"
+        id="btnLaneUp"
+      >
+        ▲
+      </button>
+
+      <button
+        class="btn btn-secondary"
+        id="btnLaneDown"
+      >
+        ▼
+      </button>
+
+    </div>
 
 
     <div class="dodge-progress-track">
@@ -691,33 +2194,15 @@
 
     </div>
 
-
-    <div class="dodge-controls">
-
-      <button
-        class="btn btn-secondary"
-        id="btnLaneUp"
-      >
-        ↑ Move Up
-      </button>
-
-      <button
-        class="btn btn-secondary"
-        id="btnLaneDown"
-      >
-        ↓ Move Down
-      </button>
-
-    </div>
-
   </div>
 
 </section>
 
 
 <!-- =========================================================
-     FOREST — POWER-UP QUESTIONS
+     FOREST — POWERUPS
      ========================================================= -->
+
 <section
   id="screen-forest-questions"
   class="screen"
@@ -781,6 +2266,7 @@
 <!-- =========================================================
      FOREST — BOSS
      ========================================================= -->
+
 <section
   id="screen-forest-boss"
   class="screen"
@@ -808,8 +2294,8 @@
       class="boss-hint"
       id="bossHint"
     >
-      Wait for the wind — then punch or kick
-      to block it. Attack in between to deal damage.
+      Wait for the wind — then punch or kick to block it.
+      Attack in between to deal damage.
     </div>
 
 
@@ -839,6 +2325,7 @@
 <!-- =========================================================
      WIN — FOREST
      ========================================================= -->
+
 <section
   id="screen-win-forest"
   class="screen"
@@ -864,8 +2351,8 @@
       class="subtitle"
       id="forestWinSubtitle"
     >
-      You survived the storm forest and
-      defeated the Skeleton King.
+      You survived the storm forest
+      and defeated the Skeleton King.
     </p>
 
     <div
@@ -886,8 +2373,9 @@
 
 
 <!-- =========================================================
-     GAME OVER
+     GAME OVER — LEVEL 1 / 2
      ========================================================= -->
+
 <section
   id="screen-gameover"
   class="screen"
@@ -907,8 +2395,7 @@
       class="subtitle"
       id="gameoverReason"
     >
-      Your health ran out before you
-      reached the finish.
+      Your health ran out before you reached the finish.
     </p>
 
 
