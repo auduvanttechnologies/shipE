@@ -1752,7 +1752,12 @@ function restartLevel3() {
 
 document.addEventListener("click", event => {
 
-    const target = event.target;
+   const target = event.target;
+
+   if (target.matches("#btnPlayNow")) {
+        hideAllGameScreens();
+        show("screen-menu");
+    }
 
     if (
         target.matches(
