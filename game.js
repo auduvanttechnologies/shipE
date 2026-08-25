@@ -1,2905 +1,1916 @@
-(() => {
-"use strict";
-
 /* =========================================================
-   QUESTION DATA — LEVELS
-   ========================================================= */
-
-const LEVELS = {
-
-  1: {
-    name: "Entrepreneurship",
-    introNote: "",
-
-    questions: {
-
-      fork: {
-        text: "What is revenue?",
-        options: [
-          {
-            text: "The total income a business earns from selling goods or services",
-            correct: true
-          },
-          {
-            text: "The money a business owes to lenders",
-            correct: false
-          },
-          {
-            text: "The number of employees a business has",
-            correct: false
-          },
-          {
-            text: "The profit left after all expenses are paid",
-            correct: false
-          }
-        ]
-      },
-
-      bird: {
-        text: "Give one example of why businesses fail.",
-        options: [
-          {
-            text: "Poor cash-flow management",
-            correct: true
-          },
-          {
-            text: "Too many happy customers",
-            correct: false
-          },
-          {
-            text: "Having too much profit",
-            correct: false
-          },
-          {
-            text: "Too much government support",
-            correct: false
-          }
-        ]
-      },
-
-      punch: {
-        text: "Which sector of the economy includes farming, fishing, and mining?",
-        options: [
-          {
-            text: "Primary sector",
-            correct: true
-          },
-          {
-            text: "Secondary sector",
-            correct: false
-          },
-          {
-            text: "Tertiary sector",
-            correct: false
-          },
-          {
-            text: "Quaternary sector",
-            correct: false
-          }
-        ]
-      },
-
-      kick: {
-        text: "Maslow's Hierarchy of Needs is a well-known motivational theory. Name one other motivational theory.",
-        options: [
-          {
-            text: "Herzberg's Two-Factor Theory",
-            correct: true
-          },
-          {
-            text: "Newton's Laws of Motion",
-            correct: false
-          },
-          {
-            text: "The Big Bang Theory",
-            correct: false
-          },
-          {
-            text: "The Pythagorean Theorem",
-            correct: false
-          }
-        ]
-      }
-
-    },
-
-    gardenPairs: [
-
-      {
-        id: 1,
-        q: "What is total cost?",
-        a: "The sum of all fixed and variable costs to produce goods"
-      },
-
-      {
-        id: 2,
-        q: "What is a business?",
-        a: "An organization that provides goods or services to earn a profit"
-      },
-
-      {
-        id: 3,
-        q: "Name the factors of production.",
-        a: "Land, labor, capital, and entrepreneurship"
-      },
-
-      {
-        id: 4,
-        q: "What is opportunity cost?",
-        a: "The value of the next best alternative given up when making a choice"
-      }
-
-    ]
-  },
-
-
-  /* =======================================================
-     LEVEL 2 — RUNNING A BUSINESS
-     ======================================================= */
-
-  2: {
-
-    name: "Running a Business",
-
-    introNote:
-      "Business structures and company terminology in this level are based on the United States.",
-
-    questions: {
-
-      /* ---------------- OPERATIONS ---------------- */
-
-      fork: {
-        text: "Which production method is best suited to making a unique, highly customized product for one customer?",
-
-        options: [
-
-          {
-            text: "Job production",
-            correct: true
-          },
-
-          {
-            text: "Continuous production",
-            correct: false
-          },
-
-          {
-            text: "Batch production",
-            correct: false
-          },
-
-          {
-            text: "Just-in-time production",
-            correct: false
-          }
-
-        ]
-      },
-
-
-      /* ---------------- OPERATIONS / INVENTORY ---------------- */
-
-      bird: {
-        text: "What is the main idea behind just-in-time (JIT) inventory?",
-
-        options: [
-
-          {
-            text: "Receive materials close to when they are needed, keeping inventory low",
-            correct: true
-          },
-
-          {
-            text: "Keep as much inventory as possible in storage",
-            correct: false
-          },
-
-          {
-            text: "Produce every product only once",
-            correct: false
-          },
-
-          {
-            text: "Eliminate the need to forecast demand",
-            correct: false
-          }
-
-        ]
-      },
-
-
-      /* ---------------- COST ---------------- */
-
-      punch: {
-        text: "A company's rent stays the same even when it produces more units. What type of cost is rent in this example?",
-
-        options: [
-
-          {
-            text: "Fixed cost",
-            correct: true
-          },
-
-          {
-            text: "Variable cost",
-            correct: false
-          },
-
-          {
-            text: "Average cost",
-            correct: false
-          },
-
-          {
-            text: "Opportunity cost",
-            correct: false
-          }
-
-        ]
-      },
-
-
-      /* ---------------- FINANCE / RATIOS ---------------- */
-
-      kick: {
-        text: "A business has $50,000 in current assets and $25,000 in current liabilities. What is its current ratio?",
-
-        options: [
-
-          {
-            text: "2.0",
-            correct: true
-          },
-
-          {
-            text: "0.5",
-            correct: false
-          },
-
-          {
-            text: "1.5",
-            correct: false
-          },
-
-          {
-            text: "75,000",
-            correct: false
-          }
-
-        ]
-      }
-
-    },
-
-
-    gardenPairs: [
-
-      {
-        id: 1,
-        q: "Continuous vs. batch vs. job production",
-        a: "Continuous = nonstop standardized output; batch = groups of products; job = individual customized work"
-      },
-
-      {
-        id: 2,
-        q: "What does just-in-time (JIT) aim to do?",
-        a: "Keep inventory low by receiving or producing materials close to when they are needed"
-      },
-
-      {
-        id: 3,
-        q: "Shareholders vs. stakeholders",
-        a: "Shareholders own an interest in the company; stakeholders are people or groups affected by its activities"
-      },
-
-      {
-        id: 4,
-        q: "What does an income statement show?",
-        a: "Revenue and expenses over a period, leading to profit or loss"
-      }
-
-    ]
-
-  }
-
-};
-
-
-/* =========================================================
-   GAME STATE
+   shipE - Game JavaScript
+   Levels 1, 2 and 3
    ========================================================= */
 
 const state = {
+    currentLevel: 1,
+    currentYear: 1,
 
-  level: 1,
+    industry: null,
+    startupType: null,
 
-  health: 100,
+    companyValue: 100000,
+    computerValue: 100000,
 
-  shields: 0,
+    users: 0,
+    revenue: 0,
+    cash: 100000,
 
-  boss: {
-    health: 100
-  },
+    reputation: 50,
+    marketShare: 10,
 
-  powerups: {
-    punch: false,
-    kick: false
-  }
+    cofounder: true,
+    cofounderEquity: 50,
 
+    ipo: false,
+    bankrupt: false,
+
+    actionsThisYear: 0,
+    yearStarted: false,
+    timer: null,
+    timeRemaining: 120,
+
+    history: []
 };
 
-let dodgeRAF = null;
-let bossRAF = null;
-
 
 /* =========================================================
-   UTILITIES
-   ========================================================= */
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-
-function shuffle(arr) {
-
-  const a = arr.slice();
-
-  for (let i = a.length - 1; i > 0; i--) {
-
-    const j = Math.floor(Math.random() * (i + 1));
-
-    [a[i], a[j]] = [a[j], a[i]];
-
-  }
-
-  return a;
-
-}
-
-
-/* =========================================================
-   SCREEN MANAGEMENT
-   ========================================================= */
-
-function showScreen(id) {
-
-  document
-    .querySelectorAll(".screen")
-    .forEach((screen) => {
-      screen.classList.remove("active");
-    });
-
-  $(id).classList.add("active");
-
-
-  const gameplayScreens = [
-
-    "screen-fork",
-
-    "screen-candy-garden",
-
-    "screen-candy-quicksand",
-
-    "screen-forest-dodge",
-
-    "screen-forest-questions",
-
-    "screen-forest-boss"
-
-  ];
-
-
-  $("hud").classList.toggle(
-    "hidden",
-    !gameplayScreens.includes(id)
-  );
-
-
-  $("bossBars").classList.toggle(
-    "hidden",
-    id !== "screen-forest-boss"
-  );
-
-
-  if (
-    id !== "screen-forest-dodge" &&
-    dodgeRAF
-  ) {
-
-    cancelAnimationFrame(dodgeRAF);
-    dodgeRAF = null;
-
-  }
-
-
-  if (
-    id !== "screen-forest-boss" &&
-    bossRAF
-  ) {
-
-    cancelAnimationFrame(bossRAF);
-    bossRAF = null;
-
-  }
-
-}
-
-
-/* =========================================================
-   RESET
-   ========================================================= */
-
-function resetState() {
-
-  state.health = 100;
-
-  state.shields = 0;
-
-  state.boss.health = 100;
-
-  state.powerups.punch = false;
-
-  state.powerups.kick = false;
-
-
-  $("shieldBadges").innerHTML = "";
-
-
-  updateHealthUI();
-
-  updateBossUI();
-
-}
-
-
-/* =========================================================
-   HEALTH / SHIELD UI
-   ========================================================= */
-
-function updateHealthUI() {
-
-  const fill = $("playerHealthFill");
-
-  fill.style.width = state.health + "%";
-
-
-  if (state.health >= 60) {
-
-    fill.style.background = "var(--ok-green)";
-
-  }
-
-  else if (state.health >= 30) {
-
-    fill.style.background = "var(--warn-yellow)";
-
-  }
-
-  else {
-
-    fill.style.background = "var(--danger-red)";
-
-  }
-
-}
-
-
-function updateBossUI() {
-
-  const fill = $("bossHealthFill");
-
-  fill.style.width =
-    Math.max(0, state.boss.health) + "%";
-
-}
-
-
-function reduceHealth(amount) {
-
-  state.health =
-    Math.max(0, state.health - amount);
-
-
-  updateHealthUI();
-
-
-  const avatar = $("hudAvatar");
-
-  avatar.style.filter =
-    "brightness(0.5) sepia(1) hue-rotate(-40deg) saturate(4)";
-
-
-  setTimeout(() => {
-
-    avatar.style.filter = "";
-
-  }, 250);
-
-
-  if (state.health <= 0) {
-
-    triggerGameOver();
-
-  }
-
-}
-
-
-function addShield() {
-
-  state.shields++;
-
-
-  const badge =
-    document.createElement("div");
-
-
-  badge.className =
-    "shield-badge";
-
-
-  badge.textContent = "+";
-
-
-  $("shieldBadges")
-    .appendChild(badge);
-
-}
-
-
-function triggerGameOver(reason) {
-
-  if (dodgeRAF) {
-
-    cancelAnimationFrame(dodgeRAF);
-    dodgeRAF = null;
-
-  }
-
-
-  if (bossRAF) {
-
-    cancelAnimationFrame(bossRAF);
-    bossRAF = null;
-
-  }
-
-
-  $("gameoverReason").textContent =
-    reason ||
-    "Your health ran out before you reached the finish.";
-
-
-  showScreen("screen-gameover");
-
-}
-
-
-/* =========================================================
-   MULTIPLE CHOICE QUESTION RENDERER
-   ========================================================= */
-
-function renderMCQ(
-  container,
-  question,
-  onResult
-) {
-
-  container.innerHTML = "";
-
-
-  const opts =
-    shuffle(question.options);
-
-
-  opts.forEach((opt) => {
-
-    const btn =
-      document.createElement("button");
-
-
-    btn.className =
-      "q-option";
-
-
-    btn.textContent =
-      opt.text;
-
-
-    btn.addEventListener(
-      "click",
-      () => {
-
-        container
-          .querySelectorAll(".q-option")
-          .forEach((button) => {
-            button.disabled = true;
-          });
-
-
-        if (opt.correct) {
-
-          btn.classList.add("correct");
-
-        }
-
-        else {
-
-          btn.classList.add("wrong");
-
-
-          const correctBtn =
-            [
-              ...container
-                .querySelectorAll(".q-option")
-            ]
-              .find(
-                (button, index) =>
-                  opts[index].correct
-              );
-
-
-          if (correctBtn) {
-
-            correctBtn.classList.add("correct");
-
-          }
-
-        }
-
-
-        setTimeout(
-          () => onResult(opt.correct),
-          550
-        );
-
-      }
-    );
-
-
-    container.appendChild(btn);
-
-  });
-
-}
-
-
-/* =========================================================
-   LEVEL INTRO
-   ========================================================= */
-
-function configureLevelIntro() {
-
-  const level =
-    LEVELS[state.level];
-
-
-  /*
-   * These three elements were previously hard-coded
-   * to Level 1 in index.html.
-   */
-
-  $("levelIntroEyebrow").textContent =
-    `level ${state.level}`;
-
-
-  $("levelIntroNumber").textContent =
-    `Level ${state.level}`;
-
-
-  $("levelIntroTitle").textContent =
-    level.name;
-
-
-  $("levelIntroCopy").innerHTML =
-
-    state.level === 2
-
-      ? "Your health bar starts full and green. Wrong answers cost you health. Learn how a real business operates, then survive the road to the finish."
-
-      : "Your health bar starts full and green. Wrong answers cost you health. If it ever runs out — you're out of the level. Get from <b>Start</b> to <b>Finish</b> in one piece.";
-
-
-  $("levelIntroNote").textContent =
-    level.introNote;
-
-}
-
-
-/* =========================================================
-   WIN SCREENS
-   ========================================================= */
-
-function configureWinScreens() {
-
-  if (state.level === 2) {
-
-    $("candyWinEyebrow").textContent =
-      "level 2 complete";
-
-    $("candyWinTitle").textContent =
-      "BUSINESS IS MOVING!";
-
-    $("candyWinSubtitle").textContent =
-      "You made it through the candy road and kept the business running.";
-
-
-    $("forestWinEyebrow").textContent =
-      "level 2 complete";
-
-    $("forestWinTitle").textContent =
-      "THE BUSINESS SURVIVES!";
-
-    $("forestWinSubtitle").textContent =
-      "You survived the storm forest, defeated the Skeleton King, and kept the business alive.";
-
-  }
-
-  else {
-
-    $("candyWinEyebrow").textContent =
-      "level 1 complete";
-
-    $("candyWinTitle").textContent =
-      "YOU MADE IT!";
-
-    $("candyWinSubtitle").textContent =
-      "You skipped through candyland and reached the finish line in one piece.";
-
-
-    $("forestWinEyebrow").textContent =
-      "level 1 complete";
-
-    $("forestWinTitle").textContent =
-      "THE KING FALLS!";
-
-    $("forestWinSubtitle").textContent =
-      "You survived the storm forest and defeated the Skeleton King.";
-
-  }
-
-}
-
-
-/* =========================================================
-   FORK SCREEN
-   ========================================================= */
-
-function initFork() {
-
-  const runner =
-    $("forkRunner");
-
-
-  runner.className =
-    "fork-runner";
-
-
-  $("forkQuestionCard")
-    .style.opacity = "1";
-
-
-  const question =
-    LEVELS[state.level]
-      .questions.fork;
-
-
-  $("forkQText").textContent =
-    question.text;
-
-
-  renderMCQ(
-    $("forkQOptions"),
-    question,
-    (correct) => {
-
-      $("forkQuestionCard")
-        .style.opacity = "0";
-
-
-      runner.classList.add(
-        correct
-          ? "go-candy"
-          : "go-forest"
-      );
-
-
-      setTimeout(() => {
-
-        if (correct) {
-
-          initGarden();
-
-          showScreen(
-            "screen-candy-garden"
-          );
-
-        }
-
-        else {
-
-          showScreen(
-            "screen-forest-dodge"
-          );
-
-          initDodge();
-
-        }
-
-      }, 1150);
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CANDYLAND — GARDEN MATCHING
-   ========================================================= */
-
-let gardenSelected = null;
-
-let gardenMatchedCount = 0;
-
-
-function initGarden() {
-
-  gardenSelected = null;
-
-  gardenMatchedCount = 0;
-
-
-  $("btnGardenContinue")
-    .classList.add("hidden");
-
-
-  const qCol =
-    $("matchQuestions");
-
-  const aCol =
-    $("matchAnswers");
-
-  const svg =
-    $("matchSvg");
-
-
-  qCol.innerHTML = "";
-
-  aCol.innerHTML = "";
-
-  svg.innerHTML = "";
-
-
-  const pairs =
-    LEVELS[state.level]
-      .gardenPairs;
-
-
-  pairs.forEach((pair) => {
-
-    const qNode =
-      document.createElement("div");
-
-
-    qNode.className =
-      "match-node q-node";
-
-
-    qNode.textContent =
-      pair.q;
-
-
-    qNode.dataset.pairId =
-      pair.id;
-
-
-    qNode.tabIndex = 0;
-
-
-    qCol.appendChild(qNode);
-
-  });
-
-
-  shuffle(pairs)
-    .forEach((pair) => {
-
-      const aNode =
-        document.createElement("div");
-
-
-      aNode.className =
-        "match-node a-node";
-
-
-      aNode.textContent =
-        pair.a;
-
-
-      aNode.dataset.pairId =
-        pair.id;
-
-
-      aNode.tabIndex = 0;
-
-
-      aCol.appendChild(aNode);
-
-    });
-
-
-  qCol
-    .querySelectorAll(".q-node")
-    .forEach((node) => {
-
-      node.addEventListener(
-        "click",
-        () => selectQuestionNode(node)
-      );
-
-    });
-
-
-  aCol
-    .querySelectorAll(".a-node")
-    .forEach((node) => {
-
-      node.addEventListener(
-        "click",
-        () => tryMatch(node)
-      );
-
-    });
-
-}
-
-
-function selectQuestionNode(node) {
-
-  if (
-    node.classList.contains("matched")
-  ) {
-
-    return;
-
-  }
-
-
-  document
-    .querySelectorAll(".q-node")
-    .forEach((n) => {
-
-      n.classList.remove("active");
-
-    });
-
-
-  node.classList.add("active");
-
-
-  gardenSelected = node;
-
-}
-
-
-function tryMatch(aNode) {
-
-  if (
-    aNode.classList.contains("matched") ||
-    !gardenSelected
-  ) {
-
-    return;
-
-  }
-
-
-  const correct =
-    gardenSelected.dataset.pairId ===
-    aNode.dataset.pairId;
-
-
-  if (correct) {
-
-    drawWavyLine(
-      gardenSelected,
-      aNode
-    );
-
-
-    gardenSelected
-      .classList.remove("active");
-
-
-    gardenSelected
-      .classList.add("matched");
-
-
-    aNode.classList.add("matched");
-
-
-    gardenSelected = null;
-
-
-    gardenMatchedCount++;
-
-
-    addShield();
-
-
-    if (
-      gardenMatchedCount >=
-      LEVELS[state.level]
-        .gardenPairs.length
-    ) {
-
-      $("btnGardenContinue")
-        .classList.remove("hidden");
-
-    }
-
-  }
-
-  else {
-
-    [
-      gardenSelected,
-      aNode
-    ].forEach((node) => {
-
-      node.classList.add("shake");
-
-
-      setTimeout(() => {
-
-        node.classList.remove("shake");
-
-      }, 400);
-
-    });
-
-
-    reduceHealth(15);
-
-  }
-
-}
-
-
-function drawWavyLine(
-  qNode,
-  aNode
-) {
-
-  const wrap =
-    $("matchWrap");
-
-  const svg =
-    $("matchSvg");
-
-
-  const wrapRect =
-    wrap.getBoundingClientRect();
-
-  const qRect =
-    qNode.getBoundingClientRect();
-
-  const aRect =
-    aNode.getBoundingClientRect();
-
-
-  const x1 =
-    qRect.right -
-    wrapRect.left;
-
-
-  const y1 =
-    qRect.top +
-    qRect.height / 2 -
-    wrapRect.top;
-
-
-  const x2 =
-    aRect.left -
-    wrapRect.left;
-
-
-  const y2 =
-    aRect.top +
-    aRect.height / 2 -
-    wrapRect.top;
-
-
-  const segments = 8;
-
-
-  const dx =
-    (x2 - x1) / segments;
-
-
-  const dy =
-    (y2 - y1) / segments;
-
-
-  const len =
-    Math.hypot(dx, dy) || 1;
-
-
-  const nx =
-    -dy / len;
-
-
-  const ny =
-    dx / len;
-
-
-  const amp = 9;
-
-
-  let d =
-    `M ${x1} ${y1}`;
-
-
-  for (
-    let i = 1;
-    i <= segments;
-    i++
-  ) {
-
-    const px =
-      x1 + dx * i;
-
-
-    const py =
-      y1 + dy * i;
-
-
-    const wave =
-      Math.sin(i * 1.15) *
-      amp;
-
-
-    d +=
-      ` L ${(px + nx * wave).toFixed(1)} ${(py + ny * wave).toFixed(1)}`;
-
-  }
-
-
-  const path =
-    document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path"
-    );
-
-
-  path.setAttribute(
-    "d",
-    d
-  );
-
-  path.setAttribute(
-    "fill",
-    "none"
-  );
-
-  path.setAttribute(
-    "stroke",
-    "#4CE0B3"
-  );
-
-  path.setAttribute(
-    "stroke-width",
-    "4"
-  );
-
-  path.setAttribute(
-    "stroke-linecap",
-    "round"
-  );
-
-
-  path.style.opacity = "0";
-
-  path.style.transition =
-    "opacity .3s ease";
-
-
-  svg.appendChild(path);
-
-
-  requestAnimationFrame(
-    () => {
-      path.style.opacity = "1";
-    }
-  );
-
-}
-
-
-$("btnGardenContinue")
-  .addEventListener(
-    "click",
-    () => {
-
-      showScreen(
-        "screen-candy-quicksand"
-      );
-
-      initQuicksand();
-
-    }
-  );
-
-
-/* =========================================================
-   CANDYLAND — QUICKSAND
-   ========================================================= */
-
-function initQuicksand() {
-
-  $("birdQText").textContent =
-    LEVELS[state.level]
-      .questions.bird.text;
-
-
-  askBird();
-
-}
-
-
-function askBird() {
-
-  const question =
-    LEVELS[state.level]
-      .questions.bird;
-
-
-  renderMCQ(
-    $("birdQOptions"),
-    question,
-    (correct) => {
-
-      if (correct) {
-
-        $("quicksandSprite").style.transition =
-          "transform 1s ease, opacity 1s ease";
-
-
-        $("quicksandSprite").style.transform =
-          "translate(-50%, -60px)";
-
-
-        $("quicksandSprite").style.opacity =
-          "0";
-
-
-        setTimeout(() => {
-
-          $("winStatsCandy").innerHTML =
-
-            `<div class="win-stat">❤️ Health left: ${state.health}%</div>` +
-
-            `<div class="win-stat">🛡️ Shields earned: ${state.shields}</div>`;
-
-
-          showScreen(
-            "screen-win-candy"
-          );
-
-        }, 900);
-
-      }
-
-      else {
-
-        reduceHealth(20);
-
-
-        $("questionBird")
-          .classList.add("shake");
-
-
-        setTimeout(() => {
-
-          $("questionBird")
-            .classList.remove("shake");
-
-        }, 400);
-
-
-        if (state.health > 0) {
-
-          setTimeout(
-            askBird,
-            500
-          );
-
-        }
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   FOREST — DODGE
-   ========================================================= */
-
-const DODGE_DURATION =
-  16000;
-
-
-function initDodge() {
-
-  const canvas =
-    $("dodgeCanvas");
-
-
-  const ctx =
-    canvas.getContext("2d");
-
-
-  const W =
-    canvas.width;
-
-
-  const H =
-    canvas.height;
-
-
-  const lanes = [
-
-    H * 0.22,
-
-    H * 0.52,
-
-    H * 0.82
-
-  ];
-
-
-  let lane = 1;
-
-  let playerX = 110;
-
-  let obstacles = [];
-
-  let lastSpawn = 0;
-
-  let spawnInterval = 1100;
-
-  let startTime = null;
-
-  let invulnUntil = 0;
-
-  let running = true;
-
-
-  $("dodgeProgressFill")
-    .style.width = "0%";
-
-
-  function setLane(n) {
-
-    lane =
-      Math.max(
-        0,
-        Math.min(2, n)
-      );
-
-  }
-
-
-  function onKey(e) {
-
-    if (e.key === "ArrowUp") {
-
-      setLane(lane - 1);
-
-    }
-
-
-    if (e.key === "ArrowDown") {
-
-      setLane(lane + 1);
-
-    }
-
-  }
-
-
-  document.addEventListener(
-    "keydown",
-    onKey
-  );
-
-
-  const upBtn =
-    $("btnLaneUp");
-
-
-  const downBtn =
-    $("btnLaneDown");
-
-
-  const upHandler =
-    () => setLane(lane - 1);
-
-
-  const downHandler =
-    () => setLane(lane + 1);
-
-
-  upBtn.addEventListener(
-    "click",
-    upHandler
-  );
-
-
-  downBtn.addEventListener(
-    "click",
-    downHandler
-  );
-
-
-  function drawBranch(o) {
-
-    ctx.save();
-
-
-    ctx.translate(
-      o.x,
-      lanes[o.lane]
-    );
-
-
-    ctx.fillStyle =
-      "#6B4A2C";
-
-
-    ctx.fillRect(
-      -45,
-      -9,
-      90,
-      18
-    );
-
-
-    ctx.fillStyle =
-      "#E14B4B";
-
-
-    for (
-      let i = -30;
-      i <= 30;
-      i += 15
-    ) {
-
-      ctx.beginPath();
-
-      ctx.moveTo(
-        i,
-        -9
-      );
-
-      ctx.lineTo(
-        i + 6,
-        -20
-      );
-
-      ctx.lineTo(
-        i + 12,
-        -9
-      );
-
-      ctx.fill();
-
-
-      ctx.beginPath();
-
-      ctx.moveTo(
-        i,
-        9
-      );
-
-      ctx.lineTo(
-        i + 6,
-        20
-      );
-
-      ctx.lineTo(
-        i + 12,
-        9
-      );
-
-      ctx.fill();
-
-    }
-
-
-    ctx.restore();
-
-  }
-
-
-  function drawPlayer(flash) {
-
-    ctx.save();
-
-
-    ctx.translate(
-      playerX,
-      lanes[lane]
-    );
-
-
-    ctx.globalAlpha =
-      flash ? 0.4 : 1;
-
-
-    ctx.fillStyle =
-      "#F2A65A";
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      0,
-      22,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle =
-      "#24163F";
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-      -7,
-      -3,
-      3,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-      7,
-      -3,
-      3,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle =
-      "#4CE0B3";
-
-
-    ctx.fillRect(
-      -16,
-      14,
-      32,
-      8
-    );
-
-
-    ctx.restore();
-
-  }
-
-
-  function loop(ts) {
-
-    if (!startTime) {
-
-      startTime = ts;
-
-    }
-
-
-    const elapsed =
-      ts - startTime;
-
-
-    const progress =
-      Math.min(
-        1,
-        elapsed / DODGE_DURATION
-      );
-
-
-    $("dodgeProgressFill")
-      .style.width =
-      progress * 100 + "%";
-
-
-    ctx.clearRect(
-      0,
-      0,
-      W,
-      H
-    );
-
-
-    ctx.strokeStyle =
-      "rgba(255,255,255,.08)";
-
-
-    lanes.forEach((y) => {
-
-      ctx.beginPath();
-
-      ctx.moveTo(
-        0,
-        y + 26
-      );
-
-      ctx.lineTo(
-        W,
-        y + 26
-      );
-
-      ctx.stroke();
-
-    });
-
-
-    if (
-      elapsed - lastSpawn >
-      spawnInterval
-    ) {
-
-      lastSpawn = elapsed;
-
-
-      obstacles.push({
-
-        x: W + 40,
-
-        lane:
-          Math.floor(
-            Math.random() * 3
-          ),
-
-        hit: false
-
-      });
-
-
-      spawnInterval =
-        Math.max(
-          650,
-          spawnInterval - 15
-        );
-
-    }
-
-
-    const speed =
-      4.2 + elapsed / 4000;
-
-
-    obstacles.forEach((o) => {
-
-      o.x -= speed;
-
-      drawBranch(o);
-
-    });
-
-
-    obstacles =
-      obstacles.filter(
-        (o) => o.x > -60
-      );
-
-
-    const flashing =
-      ts < invulnUntil;
-
-
-    obstacles.forEach((o) => {
-
-      if (
-        !o.hit &&
-        !flashing &&
-        o.lane === lane &&
-        Math.abs(o.x - playerX) < 34
-      ) {
-
-        o.hit = true;
-
-        reduceHealth(12);
-
-        invulnUntil =
-          ts + 700;
-
-      }
-
-    });
-
-
-    drawPlayer(flashing);
-
-
-    if (
-      progress >= 1 &&
-      running
-    ) {
-
-      running = false;
-
-      cleanup();
-
-
-      showScreen(
-        "screen-forest-questions"
-      );
-
-
-      initForestQuestions();
-
-
-      return;
-
-    }
-
-
-    if (state.health <= 0) {
-
-      cleanup();
-
-      return;
-
-    }
-
-
-    dodgeRAF =
-      requestAnimationFrame(loop);
-
-  }
-
-
-  function cleanup() {
-
-    document.removeEventListener(
-      "keydown",
-      onKey
-    );
-
-
-    upBtn.removeEventListener(
-      "click",
-      upHandler
-    );
-
-
-    downBtn.removeEventListener(
-      "click",
-      downHandler
-    );
-
-  }
-
-
-  dodgeRAF =
-    requestAnimationFrame(loop);
-
-}
-
-
-/* =========================================================
-   FOREST — POWER-UP QUESTIONS
-   ========================================================= */
-
-function initForestQuestions() {
-
-  askForestQuestion("punch");
-
-}
-
-
-function askForestQuestion(type) {
-
-  const isKick =
-    type === "kick";
-
-
-  $("forestQTitle").textContent =
-    isKick
-      ? "One more — unlock your Super Kick"
-      : "Answer to unlock your Super Punch";
-
-
-  const question =
-    LEVELS[state.level]
-      .questions[type];
-
-
-  $("forestQText").textContent =
-    question.text;
-
-
-  renderMCQ(
-    $("forestQOptions"),
-    question,
-    (correct) => {
-
-      if (correct) {
-
-        state.powerups[type] =
-          true;
-
-
-        $(
-          type === "punch"
-            ? "chipPunch"
-            : "chipKick"
-        )
-          .classList.add("unlocked");
-
-      }
-
-      else {
-
-        reduceHealth(15);
-
-      }
-
-
-      if (state.health <= 0) {
-
-        return;
-
-      }
-
-
-      if (type === "punch") {
-
-        setTimeout(
-          () => askForestQuestion("kick"),
-          500
-        );
-
-      }
-
-      else {
-
-        setTimeout(() => {
-
-          showScreen(
-            "screen-forest-boss"
-          );
-
-          initBoss();
-
-        }, 700);
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   FOREST — BOSS
-   ========================================================= */
-
-const CYCLE_MS =
-  3000;
-
-
-const WIND_MS =
-  800;
-
-
-function initBoss() {
-
-  state.boss.health =
-    100;
-
-
-  updateBossUI();
-
-
-  const canvas =
-    $("bossCanvas");
-
-
-  const ctx =
-    canvas.getContext("2d");
-
-
-  const W =
-    canvas.width;
-
-
-  const H =
-    canvas.height;
-
-
-  let start = null;
-
-  let windHandled = true;
-
-  let lastPhase = "idle";
-
-  let attackCooldownUntil = 0;
-
-  let hitFlashUntil = 0;
-
-  let blockFlashUntil = 0;
-
-  let bossHurtUntil = 0;
-
-  let finished = false;
-
-
-  function currentPhase(
-    cycleTime
-  ) {
-
-    return cycleTime >=
-      CYCLE_MS - WIND_MS
-      ? "wind"
-      : "idle";
-
-  }
-
-
-  function attemptAction(kind) {
-
-    if (finished) {
-
-      return;
-
-    }
-
-
-    const now =
-      performance.now();
-
-
-    const cycleTime =
-      (now - start) %
-      CYCLE_MS;
-
-
-    const phase =
-      currentPhase(cycleTime);
-
-
-    if (phase === "wind") {
-
-      if (!windHandled) {
-
-        windHandled = true;
-
-        blockFlashUntil =
-          now + 300;
-
-      }
-
-    }
-
-    else {
-
-      if (
-        now >=
-        attackCooldownUntil
-      ) {
-
-        attackCooldownUntil =
-          now + 380;
-
-
-        const dmg =
-          state.powerups[kind]
-            ? 8
-            : 4;
-
-
-        state.boss.health =
-          Math.max(
-            0,
-            state.boss.health - dmg
-          );
-
-
-        updateBossUI();
-
-
-        bossHurtUntil =
-          now + 200;
-
-      }
-
-    }
-
-  }
-
-
-  function onKey(e) {
-
-    if (
-      e.key === "z" ||
-      e.key === "Z"
-    ) {
-
-      attemptAction("punch");
-
-    }
-
-
-    if (
-      e.key === "x" ||
-      e.key === "X"
-    ) {
-
-      attemptAction("kick");
-
-    }
-
-  }
-
-
-  document.addEventListener(
-    "keydown",
-    onKey
-  );
-
-
-  const punchBtn =
-    $("btnPunch");
-
-
-  const kickBtn =
-    $("btnKick");
-
-
-  const punchHandler =
-    () => attemptAction("punch");
-
-
-  const kickHandler =
-    () => attemptAction("kick");
-
-
-  punchBtn.addEventListener(
-    "click",
-    punchHandler
-  );
-
-
-  kickBtn.addEventListener(
-    "click",
-    kickHandler
-  );
-
-
-  function drawSkeleton(
-    cycleTime,
-    now
-  ) {
-
-    const phase =
-      currentPhase(cycleTime);
-
-
-    const bx =
-      W - 220;
-
-
-    const by =
-      H / 2 - 20;
-
-
-    ctx.save();
-
-
-    ctx.translate(
-      bx,
-      by
-    );
-
-
-    const shake =
-      phase === "wind"
-        ? Math.sin(now / 30) * 4
-        : 0;
-
-
-    ctx.translate(
-      shake,
-      0
-    );
-
-
-    const hurt =
-      now < bossHurtUntil;
-
-
-    ctx.fillStyle =
-      hurt
-        ? "#FF9E9E"
-        : "#E9E6DA";
-
-
-    /* skull */
-
-    ctx.fillRect(
-      -24,
-      -110,
-      48,
-      44
-    );
-
-
-    ctx.fillStyle =
-      "#150E24";
-
-
-    ctx.fillRect(
-      -14,
-      -96,
-      10,
-      12
-    );
-
-
-    ctx.fillRect(
-      6,
-      -96,
-      10,
-      12
-    );
-
-
-    ctx.fillStyle =
-      hurt
-        ? "#FF9E9E"
-        : "#E9E6DA";
-
-
-    ctx.fillRect(
-      -10,
-      -70,
-      20,
-      6
-    );
-
-
-    /* rib cage */
-
-    ctx.fillRect(
-      -30,
-      -60,
-      60,
-      70
-    );
-
-
-    ctx.fillStyle =
-      "#150E24";
-
-
-    for (
-      let i = -50;
-      i <= 55;
-      i += 14
-    ) {
-
-      ctx.fillRect(
-        -26,
-        i,
-        52,
-        5
-      );
-
-    }
-
-
-    ctx.fillStyle =
-      hurt
-        ? "#FF9E9E"
-        : "#E9E6DA";
-
-
-    /* arms */
-
-    const armAngle =
-      phase === "wind"
-        ? -0.9
-        : -0.3;
-
-
-    ctx.save();
-
-    ctx.translate(
-      -30,
-      -50
-    );
-
-    ctx.rotate(
-      armAngle
-    );
-
-    ctx.fillRect(
-      -8,
-      0,
-      16,
-      70
-    );
-
-    ctx.restore();
-
-
-    ctx.save();
-
-    ctx.translate(
-      30,
-      -50
-    );
-
-    ctx.rotate(
-      -armAngle
-    );
-
-    ctx.fillRect(
-      -8,
-      0,
-      16,
-      70
-    );
-
-    ctx.restore();
-
-
-    /* legs */
-
-    ctx.fillRect(
-      -24,
-      10,
-      16,
-      70
-    );
-
-
-    ctx.fillRect(
-      8,
-      10,
-      16,
-      70
-    );
-
-
-    ctx.restore();
-
-
-    /* wind */
-
-    if (phase === "wind") {
-
-      const windProgress =
-        (
-          cycleTime -
-          (CYCLE_MS - WIND_MS)
-        ) /
-        WIND_MS;
-
-
-      ctx.save();
-
-
-      ctx.strokeStyle =
-        `rgba(180, 220, 255, ${
-          0.7 -
-          windProgress * 0.5
-        })`;
-
-
-      ctx.lineWidth = 3;
-
-
-      for (
-        let i = 0;
-        i < 5;
-        i++
-      ) {
-
-        const r =
-          30 +
-          windProgress * 260 +
-          i * 22;
-
-
-        ctx.beginPath();
-
-
-        ctx.ellipse(
-          bx - 60,
-          by - 20,
-          r * 0.5,
-          r * 0.18,
-          0,
-          0,
-          Math.PI * 2
-        );
-
-
-        ctx.stroke();
-
-      }
-
-
-      ctx.restore();
-
-    }
-
-  }
-
-
-  function drawPlayer(now) {
-
-    const px = 170;
-
-    const py =
-      H / 2 - 10;
-
-
-    const hit =
-      now < hitFlashUntil;
-
-
-    const block =
-      now < blockFlashUntil;
-
-
-    ctx.save();
-
-
-    ctx.translate(
-      px,
-      py
-    );
-
-
-    if (block) {
-
-      ctx.strokeStyle =
-        "#6FC7FF";
-
-
-      ctx.lineWidth = 5;
-
-
-      ctx.beginPath();
-
-
-      ctx.arc(
-        0,
-        -10,
-        46,
-        0,
-        Math.PI * 2
-      );
-
-
-      ctx.stroke();
-
-    }
-
-
-    ctx.globalAlpha =
-      hit ? 0.5 : 1;
-
-
-    ctx.fillStyle =
-      "#F2A65A";
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-      0,
-      -40,
-      24,
-      0,
-      Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
-    ctx.fillStyle =
-      "#24163F";
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-      -8,
-      -44,
-      3,
-      0,
-      Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-      8,
-      -44,
-      3,
-      0,
-      Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
-    ctx.fillStyle =
-      "#FF6FA0";
-
-
-    ctx.fillRect(
-      -20,
-      -16,
-      40,
-      55
-    );
-
-
-    ctx.fillStyle =
-      "#4CE0B3";
-
-
-    ctx.fillRect(
-      -20,
-      -16,
-      40,
-      12
-    );
-
-
-    ctx.restore();
-
-  }
-
-
-  function loop(ts) {
-
-    if (!start) {
-
-      start = ts;
-
-    }
-
-
-    const now = ts;
-
-
-    const cycleTime =
-      (now - start) %
-      CYCLE_MS;
-
-
-    const phase =
-      currentPhase(cycleTime);
-
-
-    if (
-      phase === "wind" &&
-      lastPhase === "idle"
-    ) {
-
-      windHandled = false;
-
-    }
-
-
-    if (
-      phase === "idle" &&
-      lastPhase === "wind" &&
-      !windHandled
-    ) {
-
-      reduceHealth(15);
-
-
-      hitFlashUntil =
-        now + 300;
-
-
-      windHandled = true;
-
-    }
-
-
-    lastPhase = phase;
-
-
-    ctx.clearRect(
-      0,
-      0,
-      W,
-      H
-    );
-
-
-    ctx.fillStyle =
-      "rgba(255,255,255,.03)";
-
-
-    ctx.fillRect(
-      0,
-      H - 60,
-      W,
-      60
-    );
-
-
-    drawSkeleton(
-      cycleTime,
-      now
-    );
-
-
-    drawPlayer(now);
-
-
-    if (
-      state.boss.health <= 0 &&
-      !finished
-    ) {
-
-      finished = true;
-
-      cleanup();
-
-
-      setTimeout(() => {
-
-        $("winStatsForest").innerHTML =
-
-          `<div class="win-stat">❤️ Health left: ${state.health}%</div>` +
-
-          `<div class="win-stat">👊 Super Punch: ${state.powerups.punch ? "Unlocked" : "Weak"}</div>` +
-
-          `<div class="win-stat">🦵 Super Kick: ${state.powerups.kick ? "Unlocked" : "Weak"}</div>`;
-
-
-        showScreen(
-          "screen-win-forest"
-        );
-
-      }, 400);
-
-
-      return;
-
-    }
-
-
-    if (state.health <= 0) {
-
-      finished = true;
-
-      cleanup();
-
-      return;
-
-    }
-
-
-    bossRAF =
-      requestAnimationFrame(loop);
-
-  }
-
-
-  function cleanup() {
-
-    document.removeEventListener(
-      "keydown",
-      onKey
-    );
-
-
-    punchBtn.removeEventListener(
-      "click",
-      punchHandler
-    );
-
-
-    kickBtn.removeEventListener(
-      "click",
-      kickHandler
-    );
-
-  }
-
-
-  bossRAF =
-    requestAnimationFrame(loop);
-
-}
-
-
-/* =========================================================
-   NAVIGATION
+   GENERAL NAVIGATION
    ========================================================= */
 
 function goHome() {
-
-  if (dodgeRAF) {
-
-    cancelAnimationFrame(
-      dodgeRAF
-    );
-
-    dodgeRAF = null;
-
-  }
-
-
-  if (bossRAF) {
-
-    cancelAnimationFrame(
-      bossRAF
-    );
-
-    bossRAF = null;
-
-  }
-
-
-  showScreen(
-    "screen-welcome"
-  );
-
+    window.location.href = "index.html";
 }
 
+function goToMenu() {
+    window.location.href = "levels.html";
+}
 
-function goMenu() {
-
-  if (dodgeRAF) {
-
-    cancelAnimationFrame(
-      dodgeRAF
-    );
-
-    dodgeRAF = null;
-
-  }
-
-
-  if (bossRAF) {
-
-    cancelAnimationFrame(
-      bossRAF
-    );
-
-    bossRAF = null;
-
-  }
-
-
-  showScreen(
-    "screen-menu"
-  );
-
+function selectLevel(level) {
+    if (level === 1) {
+        window.location.href = "game.html?level=1";
+    } else if (level === 2) {
+        window.location.href = "game.html?level=2";
+    } else if (level === 3) {
+        window.location.href = "game.html?level=3";
+    }
 }
 
 
 /* =========================================================
-   GAMEPLAY HUD BUTTONS
+   BASIC HELPERS
    ========================================================= */
 
-$("btnHome")
-  .addEventListener(
-    "click",
-    goHome
-  );
+function $(id) {
+    return document.getElementById(id);
+}
 
-
-$("btnMenu")
-  .addEventListener(
-    "click",
-    goMenu
-  );
-
-
-/* =========================================================
-   TITLE SCREEN
-   ========================================================= */
-
-$("btnPlayNow")
-  .addEventListener(
-    "click",
-    () => {
-
-      showScreen(
-        "screen-menu"
-      );
-
+function show(id) {
+    const element = $(id);
+    if (element) {
+        element.style.display = "";
     }
-  );
+}
 
-
-/* =========================================================
-   LEVEL SELECT
-   ========================================================= */
-
-$("btnLevel1")
-  .addEventListener(
-    "click",
-    () => {
-
-      state.level = 1;
-
-      resetState();
-
-      configureLevelIntro();
-
-      showScreen(
-        "screen-level-intro"
-      );
-
+function hide(id) {
+    const element = $(id);
+    if (element) {
+        element.style.display = "none";
     }
-  );
+}
 
-
-$("btnLevel2")
-  .addEventListener(
-    "click",
-    () => {
-
-      state.level = 2;
-
-      resetState();
-
-      configureLevelIntro();
-
-      showScreen(
-        "screen-level-intro"
-      );
-
+function setText(id, text) {
+    const element = $(id);
+    if (element) {
+        element.textContent = text;
     }
-  );
+}
 
-
-/*
- * These are the two additional buttons that exist
- * directly on the Level Select page.
- *
- * Home actually leaves the page.
- *
- * Menu intentionally just returns to the Level Select
- * page itself, since you asked for it to exist there
- * without needing to act as gameplay navigation.
- */
-
-$("btnMenuHome")
-  .addEventListener(
-    "click",
-    goHome
-  );
-
-
-$("btnMenuPage")
-  .addEventListener(
-    "click",
-    goMenu
-  );
-
-
-/* =========================================================
-   START CURRENT LEVEL
-   ========================================================= */
-
-$("btnStartLevel")
-  .addEventListener(
-    "click",
-    () => {
-
-      configureWinScreens();
-
-
-      showScreen(
-        "screen-fork"
-      );
-
-
-      initFork();
-
+function formatMoney(value) {
+    if (value >= 1000000000) {
+        return "$" + (value / 1000000000).toFixed(1) + "B";
     }
-  );
 
-
-/* =========================================================
-   WIN / GAME OVER NAVIGATION
-   ========================================================= */
-
-$("btnCandyMenu")
-  .addEventListener(
-    "click",
-    goMenu
-  );
-
-
-$("btnForestMenu")
-  .addEventListener(
-    "click",
-    goMenu
-  );
-
-
-$("btnGameoverMenu")
-  .addEventListener(
-    "click",
-    goMenu
-  );
-
-
-/* =========================================================
-   RETRY
-   ========================================================= */
-
-$("btnRetry")
-  .addEventListener(
-    "click",
-    () => {
-
-      resetState();
-
-      configureLevelIntro();
-
-      showScreen(
-        "screen-level-intro"
-      );
-
+    if (value >= 1000000) {
+        return "$" + (value / 1000000).toFixed(1) + "M";
     }
-  );
+
+    if (value >= 1000) {
+        return "$" + (value / 1000).toFixed(0) + "K";
+    }
+
+    return "$" + Math.round(value);
+}
+
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
 
 
 /* =========================================================
-   INITIALIZE
+   LEVEL DETECTION
    ========================================================= */
 
-resetState();
+function getLevelFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const level = parseInt(params.get("level"), 10);
 
-showScreen(
-  "screen-welcome"
-);
+    return Number.isNaN(level) ? 1 : level;
+}
 
-})();
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+    state.currentLevel = getLevelFromURL();
+
+    if (state.currentLevel === 3) {
+        initializeLevel3();
+    } else if (state.currentLevel === 2) {
+        initializeLevel2();
+    } else {
+        initializeLevel1();
+    }
+
+    setupNavigationButtons();
+});
+
+
+function setupNavigationButtons() {
+    const homeButtons = document.querySelectorAll(
+        "#homeButton, .home-button, [data-action='home']"
+    );
+
+    homeButtons.forEach(button => {
+        button.addEventListener("click", goHome);
+    });
+
+    const menuButtons = document.querySelectorAll(
+        "#menuButton, .menu-button, [data-action='menu']"
+    );
+
+    menuButtons.forEach(button => {
+        button.addEventListener("click", goToMenu);
+    });
+}
+
+
+/* =========================================================
+   LEVEL 1
+   ========================================================= */
+
+function initializeLevel1() {
+    state.currentLevel = 1;
+
+    /*
+       Keep Level 1 compatible with the existing game.
+       If your original Level 1 initialization exists below
+       in your HTML-specific version, these functions are
+       intentionally conservative.
+    */
+
+    setText("levelTitle", "Level 1");
+
+    const level3 = $("level3Simulator");
+    if (level3) {
+        level3.style.display = "none";
+    }
+}
+
+
+/* =========================================================
+   LEVEL 2
+   ========================================================= */
+
+function initializeLevel2() {
+    state.currentLevel = 2;
+
+    setText("levelTitle", "Running a Business");
+
+    const level3 = $("level3Simulator");
+    if (level3) {
+        level3.style.display = "none";
+    }
+
+    /*
+       Level 2 uses the same gameplay structure as Level 1.
+       Its questions should be supplied by the Level 2
+       question bank in the existing game implementation.
+    */
+}
+
+
+/* =========================================================
+   LEVEL 3
+   FUNDING SIMULATOR
+   ========================================================= */
+
+function initializeLevel3() {
+    state.currentLevel = 3;
+
+    state.currentYear = 1;
+    state.companyValue = 100000;
+    state.computerValue = 100000;
+    state.users = 0;
+    state.revenue = 0;
+    state.cash = 100000;
+    state.reputation = 50;
+    state.marketShare = 10;
+    state.cofounder = true;
+    state.cofounderEquity = 50;
+    state.ipo = false;
+    state.bankrupt = false;
+    state.actionsThisYear = 0;
+
+    hideAllGameScreens();
+
+    showLevel3Intro();
+
+    updateLevel3Displays();
+}
+
+
+/* =========================================================
+   LEVEL 3 SCREEN MANAGEMENT
+   ========================================================= */
+
+function hideAllGameScreens() {
+    const screens = [
+        "introScreen",
+        "industryScreen",
+        "spinnerScreen",
+        "startupScreen",
+        "yearScreen",
+        "eventScreen",
+        "finalScreen",
+        "level3Intro",
+        "level3Industry",
+        "level3Spinner",
+        "level3Startup",
+        "level3Game",
+        "level3Event",
+        "level3Final"
+    ];
+
+    screens.forEach(id => hide(id));
+}
+
+
+function showLevel3Intro() {
+    hideAllGameScreens();
+
+    show("level3Intro");
+    show("introScreen");
+
+    setText(
+        "dialogText",
+        "Congratulations! You have been accepted into Startup School. " +
+        "You are about to build a company from the ground up."
+    );
+
+    setText("levelTitle", "Funding Simulator");
+    setText("levelSubtitle", "A 10-year startup journey");
+}
+
+
+function startFundingSimulator() {
+    hideAllGameScreens();
+
+    show("level3Industry");
+    show("industryScreen");
+
+    setText(
+        "dialogText",
+        "First, choose the type of business you want to build."
+    );
+}
+
+
+function chooseIndustry(type) {
+    state.industry = type;
+
+    hideAllGameScreens();
+
+    show("level3Spinner");
+    show("spinnerScreen");
+
+    setText(
+        "dialogText",
+        type === "tech"
+            ? "You chose a technology startup. Let's see what kind of company you will build..."
+            : "You chose a non-technology startup. Let's see what business awaits..."
+    );
+
+    setText(
+        "spinnerLabel",
+        type === "tech"
+            ? "TECH STARTUP"
+            : "NON-TECH STARTUP"
+    );
+}
+
+
+function spinIndustry() {
+    const techIndustries = [
+        {
+            name: "Rocket Company",
+            type: "tech",
+            condition: "You are building a space technology company."
+        },
+        {
+            name: "Fintech",
+            type: "tech",
+            condition: "You are building a financial technology company."
+        },
+        {
+            name: "Developer Tools",
+            type: "tech",
+            condition: "You are building software tools for developers."
+        },
+        {
+            name: "Cybersecurity",
+            type: "tech",
+            condition: "You are building a cybersecurity company."
+        },
+        {
+            name: "Optical Computing",
+            type: "tech",
+            condition: "You are developing a new type of optical computing chip."
+        },
+        {
+            name: "Telehealth",
+            type: "tech",
+            condition: "You are building a digital healthcare company."
+        }
+    ];
+
+    const nonTechIndustries = [
+        {
+            name: "Construction",
+            type: "nontech",
+            condition: "You are building a construction company."
+        },
+        {
+            name: "Consulting",
+            type: "nontech",
+            condition: "You are building a consulting company."
+        },
+        {
+            name: "Advertising",
+            type: "nontech",
+            condition: "You are building an advertising company."
+        },
+        {
+            name: "Biodegradable Plastic",
+            type: "nontech",
+            condition: "You are developing biodegradable plastic products."
+        }
+    ];
+
+    const choices =
+        state.industry === "tech"
+            ? techIndustries
+            : nonTechIndustries;
+
+    const result =
+        choices[Math.floor(Math.random() * choices.length)];
+
+    state.startupType = result;
+
+    animateSpinner(result, choices);
+}
+
+
+function animateSpinner(result, choices) {
+    const spinner = $("spinner");
+
+    if (!spinner) {
+        finishSpinner(result);
+        return;
+    }
+
+    let count = 0;
+    const totalSpins = 18;
+
+    const interval = setInterval(() => {
+        const randomChoice =
+            choices[Math.floor(Math.random() * choices.length)];
+
+        setText("spinnerResult", randomChoice.name);
+
+        count++;
+
+        if (count >= totalSpins) {
+            clearInterval(interval);
+
+            setTimeout(() => {
+                setText("spinnerResult", result.name);
+                finishSpinner(result);
+            }, 500);
+        }
+    }, 100);
+}
+
+
+function finishSpinner(result) {
+    setTimeout(() => {
+        hideAllGameScreens();
+
+        show("level3Startup");
+        show("startupScreen");
+
+        setText("startupName", result.name);
+        setText("startupDescription", result.condition);
+
+        setText(
+            "dialogText",
+            "Your company has been accepted into Startup School. " +
+            "You and your cofounder are starting with $100,000 in pre-seed funding."
+        );
+
+        updateFounderDescription();
+    }, 700);
+}
+
+
+function updateFounderDescription() {
+    const description =
+        state.industry === "tech"
+            ? "You have a non-technical cofounder. You each own 50% of the company."
+            : "You have a technical cofounder. You each own 50% of the company.";
+
+    setText("founderDescription", description);
+}
+
+
+function startYearOne() {
+    hideAllGameScreens();
+
+    show("level3Game");
+    show("yearScreen");
+
+    state.currentYear = 1;
+    state.actionsThisYear = 0;
+    state.timeRemaining = 120;
+
+    applyYearStartConditions();
+
+    showYearDialog(
+        "YEAR 1",
+        "You receive $100,000 in pre-seed funding. " +
+        "You and your cofounder are the entire team."
+    );
+
+    updateLevel3Displays();
+    renderYearActions();
+    startYearTimer();
+}
+
+
+/* =========================================================
+   YEAR MANAGEMENT
+   ========================================================= */
+
+function startYearTimer() {
+    clearInterval(state.timer);
+
+    state.yearStarted = true;
+    state.timeRemaining = 120;
+
+    updateTimerDisplay();
+
+    state.timer = setInterval(() => {
+        state.timeRemaining--;
+
+        updateTimerDisplay();
+
+        if (state.timeRemaining <= 0) {
+            clearInterval(state.timer);
+            endCurrentYear();
+        }
+    }, 1000);
+}
+
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(state.timeRemaining / 60);
+    const seconds = state.timeRemaining % 60;
+
+    const text =
+        minutes +
+        ":" +
+        String(seconds).padStart(2, "0");
+
+    setText("yearTimer", text);
+}
+
+
+function endCurrentYear() {
+    clearInterval(state.timer);
+
+    state.yearStarted = false;
+
+    applyEndOfYearEffects();
+
+    if (state.currentYear >= 10) {
+        finishLevel3();
+        return;
+    }
+
+    state.currentYear++;
+
+    state.actionsThisYear = 0;
+
+    startNextYear();
+}
+
+
+function startNextYear() {
+    showYearDialog(
+        "YEAR " + state.currentYear,
+        getYearIntroduction(state.currentYear)
+    );
+
+    applyYearStartConditions();
+
+    renderYearActions();
+    updateLevel3Displays();
+
+    setTimeout(() => {
+        startYearTimer();
+    }, 1500);
+}
+
+
+function getYearIntroduction(year) {
+    const introductions = {
+        2:
+            "Your company is gaining serious traction. " +
+            "Investors are taking notice.",
+
+        3:
+            state.industry === "tech"
+                ? "Your startup has exploded. You have become a unicorn."
+                : "Your business is growing, but your R&D spending is consuming cash.",
+
+        4:
+            "You graduate from Startup School. Now the real challenge begins.",
+
+        5:
+            "Your company is entering its next stage of growth.",
+
+        6:
+            "Competitors are catching up. Your decisions matter more than ever.",
+
+        7:
+            "You are now an established company. Growth is becoming harder.",
+
+        8:
+            "A recession has hit the economy.",
+
+        9:
+            "The IRS has selected your company for an audit.",
+
+        10:
+            "Your company is losing customers. This is the final year."
+    };
+
+    return introductions[year] || "Another year begins.";
+}
+
+
+/* =========================================================
+   YEAR START CONDITIONS
+   ========================================================= */
+
+function applyYearStartConditions() {
+    switch (state.currentYear) {
+
+        case 1:
+            state.cash = Math.max(state.cash, 100000);
+            break;
+
+        case 2:
+            state.cash += 50000000;
+            state.companyValue = Math.max(state.companyValue, 100000000);
+            state.users = Math.max(state.users, 10000000);
+            break;
+
+        case 3:
+
+            if (state.industry === "tech") {
+                state.companyValue = Math.max(state.companyValue, 1000000000);
+                state.users = Math.max(state.users, 100000000);
+                state.revenue = Math.max(state.revenue, 200000000);
+                state.marketShare = Math.max(state.marketShare, 35);
+            } else {
+                state.cash += 10000000;
+            }
+
+            break;
+
+        case 4:
+            state.reputation += 5;
+            break;
+
+        case 5:
+            state.companyValue *= 1.10;
+            break;
+
+        case 6:
+            state.companyValue *= 1.08;
+            break;
+
+        case 7:
+            state.companyValue *= 1.12;
+            break;
+
+        case 8:
+            state.companyValue *= 0.85;
+            state.cash *= 0.85;
+            state.marketShare *= 0.92;
+            break;
+
+        case 9:
+            state.reputation -= 10;
+            state.companyValue *= 0.90;
+            break;
+
+        case 10:
+            state.users *= 0.75;
+            state.companyValue *= 0.70;
+            break;
+    }
+
+    state.companyValue = Math.max(0, state.companyValue);
+}
+
+
+/* =========================================================
+   YEAR END EFFECTS
+   ========================================================= */
+
+function applyEndOfYearEffects() {
+
+    if (state.bankrupt) {
+        return;
+    }
+
+    /*
+       Good reputation and R&D create compounding growth.
+    */
+
+    const reputationMultiplier =
+        1 + ((state.reputation - 50) / 1000);
+
+    state.companyValue *= reputationMultiplier;
+
+    /*
+       Market share contributes to valuation.
+    */
+
+    state.companyValue *=
+        1 + (state.marketShare / 10000);
+
+    /*
+       Cash shortages hurt the company.
+    */
+
+    if (state.cash < 0) {
+        state.companyValue *= 0.85;
+        state.reputation -= 5;
+    }
+
+    state.companyValue = Math.max(
+        0,
+        state.companyValue
+    );
+}
+
+
+/* =========================================================
+   ACTION CARDS
+   ========================================================= */
+
+function renderYearActions() {
+    const container =
+        $("actionCards") ||
+        $("actions") ||
+        $("level3Actions");
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = "";
+
+    const actions = getActionsForYear();
+
+    actions.forEach(action => {
+        const card = document.createElement("div");
+
+        card.className = "action-card";
+
+        card.innerHTML = `
+            <h3>${action.title}</h3>
+            <p>${action.description}</p>
+            <button>${action.buttonText || "Choose"}</button>
+        `;
+
+        card.querySelector("button")
+            .addEventListener("click", () => {
+                executeAction(action);
+            });
+
+        container.appendChild(card);
+    });
+}
+
+
+function getActionsForYear() {
+
+    if (state.currentYear === 1) {
+        return [
+            {
+                id: "product",
+                title: "Develop a new product",
+                description:
+                    "Use your funding to build something customers actually want.",
+                buttonText: "Develop"
+            },
+            {
+                id: "marketing",
+                title: "Invest in marketing",
+                description:
+                    "Spend money to attract customers and increase market share.",
+                buttonText: "Market"
+            },
+            {
+                id: "locations",
+                title: "Open a new location",
+                description:
+                    "Expand your physical presence.",
+                buttonText: "Expand"
+            },
+            {
+                id: "self",
+                title: "Spend investor money on yourself",
+                description:
+                    "Choose how much of the company's money to spend personally.",
+                buttonText: "Spend"
+            },
+            {
+                id: "rnd",
+                title: "Invest in R&D",
+                description:
+                    "Fund research that could create long-term advantages.",
+                buttonText: "Research"
+            },
+            {
+                id: "salary",
+                title: "Take a high salary",
+                description:
+                    "Pay yourself a large salary.",
+                buttonText: "Take salary"
+            }
+        ];
+    }
+
+    return [
+        {
+            id: "product",
+            title: "Develop a new product",
+            description:
+                "Invest in another product or feature.",
+            buttonText: "Develop"
+        },
+        {
+            id: "marketing",
+            title: "Invest in marketing",
+            description:
+                "Increase customer acquisition.",
+            buttonText: "Market"
+        },
+        {
+            id: "rnd",
+            title: "Invest in R&D",
+            description:
+                "Create a technological or operational advantage.",
+            buttonText: "Research"
+        },
+        {
+            id: "expand",
+            title: "Expand operations",
+            description:
+                "Grow into another market.",
+            buttonText: "Expand"
+        },
+        {
+            id: "hire",
+            title: "Hire employees",
+            description:
+                "Increase your team's capacity.",
+            buttonText: "Hire"
+        },
+        {
+            id: "salary",
+            title: "Increase executive salaries",
+            description:
+                "Pay yourself and your executives more.",
+            buttonText: "Increase"
+        }
+    ];
+}
+
+
+/* =========================================================
+   ACTION EXECUTION
+   ========================================================= */
+
+function executeAction(action) {
+
+    if (state.bankrupt) {
+        return;
+    }
+
+    state.actionsThisYear++;
+
+    switch (action.id) {
+
+        case "product":
+            developProduct();
+            break;
+
+        case "marketing":
+            investMarketing();
+            break;
+
+        case "locations":
+        case "expand":
+            expandCompany();
+            break;
+
+        case "rnd":
+            investRAndD();
+            break;
+
+        case "salary":
+            takeHighSalary();
+            break;
+
+        case "self":
+            openPersonalSpendingChoice();
+            break;
+
+        case "hire":
+            hireEmployees();
+            break;
+    }
+
+    updateLevel3Displays();
+}
+
+
+/* =========================================================
+   ACTION CONSEQUENCES
+   ========================================================= */
+
+function developProduct() {
+    const cost =
+        state.currentYear <= 2
+            ? 25000
+            : 250000;
+
+    state.cash -= cost;
+
+    state.users +=
+        state.currentYear * random(10000, 50000);
+
+    state.revenue +=
+        random(10000, 100000);
+
+    state.companyValue *= 1.08;
+
+    state.reputation += 3;
+
+    showToast(
+        "Product development paid off. Your company is growing."
+    );
+}
+
+
+function investMarketing() {
+    const cost =
+        state.currentYear <= 2
+            ? 20000
+            : 200000;
+
+    state.cash -= cost;
+
+    state.users += random(25000, 150000);
+
+    state.marketShare += random(1, 5);
+
+    state.companyValue *= 1.06;
+
+    showToast(
+        "Marketing brought in new customers."
+    );
+}
+
+
+function expandCompany() {
+    const cost =
+        state.currentYear <= 2
+            ? 50000
+            : 500000;
+
+    state.cash -= cost;
+
+    state.marketShare += random(1, 4);
+
+    state.revenue += random(25000, 200000);
+
+    state.companyValue *= 1.05;
+
+    showToast(
+        "Your company expanded its operations."
+    );
+}
+
+
+function investRAndD() {
+    const cost =
+        state.currentYear <= 2
+            ? 30000
+            : 300000;
+
+    state.cash -= cost;
+
+    state.companyValue *= 1.12;
+
+    state.reputation += 5;
+
+    state.users += random(5000, 50000);
+
+    showToast(
+        "R&D created a long-term competitive advantage."
+    );
+}
+
+
+function takeHighSalary() {
+    const salary =
+        state.currentYear <= 2
+            ? 25000
+            : 250000;
+
+    state.cash -= salary;
+
+    state.reputation -= 3;
+
+    state.companyValue *= 0.97;
+
+    showToast(
+        "You paid yourself a high salary. Investors noticed."
+    );
+}
+
+
+function hireEmployees() {
+    const cost =
+        state.currentYear <= 3
+            ? 50000
+            : 500000;
+
+    state.cash -= cost;
+
+    state.reputation += 2;
+
+    state.revenue += random(25000, 150000);
+
+    state.companyValue *= 1.05;
+
+    showToast(
+        "Your team is larger and can handle more work."
+    );
+}
+
+
+/* =========================================================
+   PERSONAL SPENDING
+   ========================================================= */
+
+function openPersonalSpendingChoice() {
+
+    const amount =
+        prompt(
+            "How much investor money do you want to spend on yourself?\n\n" +
+            "Enter 10, 50 or 100."
+        );
+
+    if (amount === null) {
+        return;
+    }
+
+    const percentage = parseInt(amount, 10);
+
+    if (![10, 50, 100].includes(percentage)) {
+        showToast("Choose 10, 50 or 100.");
+        return;
+    }
+
+    const spending =
+        state.cash * (percentage / 100);
+
+    state.cash -= spending;
+
+    state.reputation -= percentage / 5;
+
+    state.companyValue *=
+        1 - (percentage / 500);
+
+    showToast(
+        "You spent " +
+        percentage +
+        "% of the company's cash on yourself."
+    );
+
+    updateLevel3Displays();
+}
+
+
+/* =========================================================
+   YEAR 2 COFOUNDER EVENT
+   ========================================================= */
+
+function triggerCofounderEvent() {
+
+    if (!state.cofounder) {
+        return;
+    }
+
+    hideAllGameScreens();
+
+    show("level3Event");
+    show("eventScreen");
+
+    setText(
+        "eventTitle",
+        "SURPRISE!"
+    );
+
+    setText(
+        "eventText",
+        "Your cofounder used the company debit card to buy " +
+        "themself a Lamborghini. It cost the company $250,000."
+    );
+
+    setText(
+        "eventExplanation",
+        "Because the purchase was made using company money, " +
+        "the company bears the financial loss. You must decide " +
+        "whether to continue working with your cofounder or buy " +
+        "out their ownership."
+    );
+}
+
+
+function keepCofounder() {
+    state.cash -= 250000;
+    state.reputation -= 2;
+
+    closeEventAndReturnToYear();
+
+    showToast(
+        "You kept your cofounder. The company absorbed the $250K loss."
+    );
+}
+
+
+function removeCofounder() {
+
+    /*
+       A buyout means the company/founder purchases the
+       cofounder's ownership interest. The exact amount is
+       based on the company's current value.
+    */
+
+    const buyoutPrice =
+        state.companyValue *
+        (state.cofounderEquity / 100);
+
+    state.cash -= buyoutPrice;
+
+    state.cofounder = false;
+
+    state.cofounderEquity = 0;
+
+    state.reputation += 3;
+
+    state.companyValue *= 1.05;
+
+    closeEventAndReturnToYear();
+
+    showToast(
+        "You bought out your cofounder's shares for " +
+        formatMoney(buyoutPrice) +
+        ". You now own the company."
+    );
+}
+
+
+function closeEventAndReturnToYear() {
+    hideAllGameScreens();
+
+    show("level3Game");
+    show("yearScreen");
+
+    updateLevel3Displays();
+    renderYearActions();
+    startYearTimer();
+}
+
+
+/* =========================================================
+   YEAR 3 EVENTS
+   ========================================================= */
+
+function triggerYear3GoodEvent() {
+
+    hideAllGameScreens();
+
+    show("level3Event");
+    show("eventScreen");
+
+    setText(
+        "eventTitle",
+        "GOOD NEWS!"
+    );
+
+    if (state.industry === "tech") {
+
+        setText(
+            "eventText",
+            "You have been featured in a technology magazine."
+        );
+
+        setText(
+            "eventExplanation",
+            "The article calls your company a 'New disruptive startup.' " +
+            "The magazine feature gives you free advertising and " +
+            "increases your market share."
+        );
+
+        state.marketShare =
+            clamp(state.marketShare + 14.5, 0, 100);
+
+        state.companyValue *= 1.15;
+
+    } else {
+
+        setText(
+            "eventText",
+            "You won a government grant and a small-business loan worth $10 million combined."
+        );
+
+        setText(
+            "eventExplanation",
+            "The grant does not have to be repaid. The loan does. " +
+            "The additional capital gives your company more runway."
+        );
+
+        state.cash += 10000000;
+        state.companyValue *= 1.10;
+    }
+
+    updateLevel3Displays();
+}
+
+
+function closeYear3Event() {
+    closeEventAndReturnToYear();
+}
+
+
+/* =========================================================
+   YEAR 8 RECESSION
+   ========================================================= */
+
+function triggerRecessionEvent() {
+
+    hideAllGameScreens();
+
+    show("level3Event");
+    show("eventScreen");
+
+    setText(
+        "eventTitle",
+        "RECESSION"
+    );
+
+    setText(
+        "eventText",
+        "The economy has entered a recession."
+    );
+
+    setText(
+        "eventExplanation",
+        "Customers and investors are becoming more cautious. " +
+        "Companies with strong cash reserves and disciplined spending " +
+        "have a better chance of surviving the downturn."
+    );
+
+    state.companyValue *= 0.85;
+    state.revenue *= 0.85;
+    state.marketShare *= 0.95;
+
+    updateLevel3Displays();
+}
+
+
+/* =========================================================
+   YEAR 9 IRS AUDIT
+   ========================================================= */
+
+function triggerAuditEvent() {
+
+    hideAllGameScreens();
+
+    show("level3Event");
+    show("eventScreen");
+
+    setText(
+        "eventTitle",
+        "IRS AUDIT"
+    );
+
+    setText(
+        "eventText",
+        "The IRS has selected your company for an audit."
+    );
+
+    setText(
+        "eventExplanation",
+        "An audit examines whether your company properly reported " +
+        "income, expenses and other tax information. Poor financial " +
+        "records can create additional costs and reputational damage."
+    );
+
+    state.cash -= random(25000, 250000);
+
+    state.reputation -= 5;
+
+    state.companyValue *= 0.95;
+
+    if (state.industry === "tech") {
+        state.marketShare *= 0.90;
+    }
+
+    updateLevel3Displays();
+}
+
+
+/* =========================================================
+   YEAR 10 CUSTOMER LOSS
+   ========================================================= */
+
+function triggerYear10Event() {
+
+    hideAllGameScreens();
+
+    show("level3Event");
+    show("eventScreen");
+
+    setText(
+        "eventTitle",
+        "CUSTOMERS ARE LEAVING"
+    );
+
+    state.users *= 0.75;
+
+    state.revenue *= 0.75;
+
+    state.marketShare *= 0.75;
+
+    state.companyValue *= 0.70;
+
+    if (state.industry === "tech") {
+
+        setText(
+            "eventText",
+            "Your company has lost too many customers and can no longer sustain its operations."
+        );
+
+        setText(
+            "eventExplanation",
+            "Your technology company has reached bankruptcy."
+        );
+
+        state.bankrupt = true;
+
+    } else {
+
+        setText(
+            "eventText",
+            "Your company is no longer profitable and is approaching bankruptcy."
+        );
+
+        setText(
+            "eventExplanation",
+            "You are not technically bankrupt yet, but the company is in serious financial trouble."
+        );
+    }
+
+    updateLevel3Displays();
+}
+
+
+/* =========================================================
+   YEAR-SPECIFIC EVENT HOOK
+   ========================================================= */
+
+function checkYearEvents() {
+
+    if (state.currentYear === 2) {
+        triggerCofounderEvent();
+        return true;
+    }
+
+    if (state.currentYear === 3) {
+        triggerYear3GoodEvent();
+        return true;
+    }
+
+    if (state.currentYear === 8) {
+        triggerRecessionEvent();
+        return true;
+    }
+
+    if (state.currentYear === 9) {
+        triggerAuditEvent();
+        return true;
+    }
+
+    if (state.currentYear === 10) {
+        triggerYear10Event();
+        return true;
+    }
+
+    return false;
+}
+
+
+/* =========================================================
+   OVERRIDE YEAR TRANSITION
+   ========================================================= */
+
+const originalEndCurrentYear = endCurrentYear;
+
+function advanceYear() {
+
+    clearInterval(state.timer);
+
+    if (checkYearEvents()) {
+        return;
+    }
+
+    originalEndCurrentYear();
+}
+
+
+/* =========================================================
+   DIALOGS
+   ========================================================= */
+
+function showYearDialog(title, text) {
+
+    const dialog =
+        $("dialog") ||
+        $("level3Dialog");
+
+    if (dialog) {
+        dialog.style.display = "";
+    }
+
+    setText("dialogTitle", title);
+    setText("dialogText", text);
+}
+
+
+function closeDialog() {
+
+    const dialog =
+        $("dialog") ||
+        $("level3Dialog");
+
+    if (dialog) {
+        dialog.style.display = "none";
+    }
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function showToast(message) {
+
+    let toast = $("toast");
+
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toast";
+        toast.className = "toast";
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
+
+
+/* =========================================================
+   DISPLAY UPDATES
+   ========================================================= */
+
+function updateLevel3Displays() {
+
+    setText(
+        "companyValue",
+        formatMoney(state.companyValue)
+    );
+
+    setText(
+        "computerValue",
+        formatMoney(state.computerValue)
+    );
+
+    setText(
+        "cashValue",
+        formatMoney(state.cash)
+    );
+
+    setText(
+        "usersValue",
+        formatUsers(state.users)
+    );
+
+    setText(
+        "revenueValue",
+        formatMoney(state.revenue)
+    );
+
+    setText(
+        "marketShare",
+        state.marketShare.toFixed(1) + "%"
+    );
+
+    setText(
+        "reputationValue",
+        Math.round(state.reputation)
+    );
+
+    setText(
+        "yearNumber",
+        state.currentYear
+    );
+
+    updateProgressBar();
+    updateCompanyPie();
+    updateComputerAI();
+}
+
+
+function formatUsers(users) {
+
+    if (users >= 1000000000) {
+        return (users / 1000000000).toFixed(1) + "B";
+    }
+
+    if (users >= 1000000) {
+        return (users / 1000000).toFixed(1) + "M";
+    }
+
+    if (users >= 1000) {
+        return (users / 1000).toFixed(0) + "K";
+    }
+
+    return Math.round(users);
+}
+
+
+/* =========================================================
+   10-YEAR PROGRESS BAR
+   ========================================================= */
+
+function updateProgressBar() {
+
+    const container =
+        $("yearProgress") ||
+        $("progressBar") ||
+        $("timeline");
+
+    if (!container) {
+        return;
+    }
+
+    const boxes =
+        container.querySelectorAll(
+            ".year-box, .progress-box, .year"
+        );
+
+    boxes.forEach((box, index) => {
+
+        box.classList.remove(
+            "completed",
+            "current"
+        );
+
+        if (index + 1 < state.currentYear) {
+            box.classList.add("completed");
+        }
+
+        if (index + 1 === state.currentYear) {
+            box.classList.add("current");
+        }
+    });
+}
+
+
+/* =========================================================
+   COMPANY VALUE PIE CHART
+   ========================================================= */
+
+function updateCompanyPie() {
+
+    const pie =
+        $("companyPie") ||
+        $("valuePie");
+
+    if (!pie) {
+        return;
+    }
+
+    const normalized =
+        clamp(
+            Math.log10(
+                Math.max(state.companyValue, 1000)
+            ) / 10,
+            0.02,
+            1
+        );
+
+    const degrees =
+        normalized * 360;
+
+    pie.style.background =
+        `conic-gradient(
+            currentColor 0deg ${degrees}deg,
+            rgba(255,255,255,0.12) ${degrees}deg 360deg
+        )`;
+}
+
+
+/* =========================================================
+   COMPUTER COMPETITOR
+   ========================================================= */
+
+function updateComputerAI() {
+
+    /*
+       The computer makes reasonable decisions automatically.
+       It does not simply copy the player.
+    */
+
+    const growthRate =
+        random(3, 10) / 100;
+
+    state.computerValue *=
+        1 + growthRate;
+
+    /*
+       Good years give the computer stronger growth.
+    */
+
+    if (
+        state.currentYear === 3 ||
+        state.currentYear === 5 ||
+        state.currentYear === 7
+    ) {
+        state.computerValue *= 1.08;
+    }
+
+    /*
+       Recession.
+    */
+
+    if (state.currentYear === 8) {
+        state.computerValue *= 0.88;
+    }
+
+    /*
+       Audit.
+    */
+
+    if (state.currentYear === 9) {
+        state.computerValue *= 0.93;
+    }
+
+    /*
+       Final customer loss.
+    */
+
+    if (state.currentYear === 10) {
+        state.computerValue *= 0.75;
+    }
+}
+
+
+/* =========================================================
+   FINAL SCREEN
+   ========================================================= */
+
+function finishLevel3() {
+
+    clearInterval(state.timer);
+
+    state.yearStarted = false;
+
+    hideAllGameScreens();
+
+    show("level3Final");
+    show("finalScreen");
+
+    const playerValue =
+        Math.max(0, state.companyValue);
+
+    const computerValue =
+        Math.max(0, state.computerValue);
+
+    setText(
+        "finalPlayerValue",
+        formatMoney(playerValue)
+    );
+
+    setText(
+        "finalComputerValue",
+        formatMoney(computerValue)
+    );
+
+    let result;
+
+    if (playerValue > computerValue) {
+        result = "YOU WIN!";
+    } else if (computerValue > playerValue) {
+        result = "THE COMPUTER WINS!";
+    } else {
+        result = "IT'S A TIE!";
+    }
+
+    setText(
+        "finalResult",
+        result
+    );
+
+    setText(
+        "finalCompanyName",
+        state.startupType
+            ? state.startupType.name
+            : "Your Company"
+    );
+
+    updateFinalStats();
+}
+
+
+function updateFinalStats() {
+
+    setText(
+        "finalUsers",
+        formatUsers(state.users)
+    );
+
+    setText(
+        "finalRevenue",
+        formatMoney(state.revenue)
+    );
+
+    setText(
+        "finalMarketShare",
+        state.marketShare.toFixed(1) + "%"
+    );
+
+    setText(
+        "finalReputation",
+        Math.round(state.reputation)
+    );
+}
+
+
+/* =========================================================
+   LEVEL 3 RESTART
+   ========================================================= */
+
+function restartLevel3() {
+
+    clearInterval(state.timer);
+
+    state.currentYear = 1;
+    state.industry = null;
+    state.startupType = null;
+    state.companyValue = 100000;
+    state.computerValue = 100000;
+    state.users = 0;
+    state.revenue = 0;
+    state.cash = 100000;
+    state.reputation = 50;
+    state.marketShare = 10;
+    state.cofounder = true;
+    state.cofounderEquity = 50;
+    state.ipo = false;
+    state.bankrupt = false;
+
+    initializeLevel3();
+}
+
+
+/* =========================================================
+   BUTTON HANDLERS
+   ========================================================= */
+
+document.addEventListener("click", event => {
+
+    const target = event.target;
+
+    if (
+        target.matches(
+            "#startFunding, [data-action='start-funding']"
+        )
+    ) {
+        startFundingSimulator();
+    }
+
+    if (
+        target.matches(
+            "#chooseTech, [data-industry='tech']"
+        )
+    ) {
+        chooseIndustry("tech");
+    }
+
+    if (
+        target.matches(
+            "#chooseNonTech, [data-industry='nontech']"
+        )
+    ) {
+        chooseIndustry("nontech");
+    }
+
+    if (
+        target.matches(
+            "#spinButton, [data-action='spin']"
+        )
+    ) {
+        spinIndustry();
+    }
+
+    if (
+        target.matches(
+            "#startYearOne, [data-action='start-year']"
+        )
+    ) {
+        startYearOne();
+    }
+
+    if (
+        target.matches(
+            "#keepCofounder, [data-action='keep-cofounder']"
+        )
+    ) {
+        keepCofounder();
+    }
+
+    if (
+        target.matches(
+            "#removeCofounder, [data-action='remove-cofounder']"
+        )
+    ) {
+        removeCofounder();
+    }
+
+    if (
+        target.matches(
+            "#closeEvent, [data-action='close-event']"
+        )
+    ) {
+        closeEventAndReturnToYear();
+    }
+
+    if (
+        target.matches(
+            "#restartLevel3, [data-action='restart']"
+        )
+    ) {
+        restartLevel3();
+    }
+
+    if (
+        target.matches(
+            "#finalMenu, [data-action='menu']"
+        )
+    ) {
+        goToMenu();
+    }
+
+    if (
+        target.matches(
+            "#finalHome, [data-action='home']"
+        )
+    ) {
+        goHome();
+    }
+});
+
+
+/* =========================================================
+   SEED FUNDING EXPLANATION
+   ========================================================= */
+
+function showSeedFundingExplanation() {
+
+    const explanation =
+        $("seedFundingExplanation");
+
+    if (!explanation) {
+        return;
+    }
+
+    explanation.textContent =
+        "Pre-seed funding is early-stage money used to help a startup " +
+        "turn an idea into a real business. It can pay for early product " +
+        "development, research, hiring, equipment, marketing and other " +
+        "startup expenses before the company has established significant revenue.";
+
+    explanation.style.display = "";
+}
+
+
+/* =========================================================
+   RUNWAY EXPLANATION
+   ========================================================= */
+
+function showRunwayExplanation() {
+
+    const explanation =
+        $("runwayExplanation");
+
+    if (!explanation) {
+        return;
+    }
+
+    explanation.textContent =
+        "Runway is the amount of time a company can continue operating " +
+        "before it runs out of cash. Six months of runway means the company " +
+        "could continue operating for roughly six more months at its current " +
+        "rate of spending.";
+
+    explanation.style.display = "";
+}
+
+
+/* =========================================================
+   EXPORTS
+   ========================================================= */
+
+window.goHome = goHome;
+window.goToMenu = goToMenu;
+window.selectLevel = selectLevel;
+
+window.startFundingSimulator = startFundingSimulator;
+window.chooseIndustry = chooseIndustry;
+window.spinIndustry = spinIndustry;
+window.startYearOne = startYearOne;
+
+window.keepCofounder = keepCofounder;
+window.removeCofounder = removeCofounder;
+
+window.restartLevel3 = restartLevel3;
+window.finishLevel3 = finishLevel3;
+
+window.showSeedFundingExplanation =
+    showSeedFundingExplanation;
+
+window.showRunwayExplanation =
+    showRunwayExplanation;
