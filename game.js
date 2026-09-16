@@ -802,6 +802,7 @@ function updateComputerAI() {
 
 function finishLevel3() {
     clearInterval(state.timer);
+    stopMusic();
     showScreen("screen-funding-finish");
 
     const playerVal = Math.max(0, state.companyValue);
@@ -877,7 +878,12 @@ function setupGlobalEventListeners() {
         const target = event.target;
 
         if (target.closest("#btnPlayNow")) {
-            showScreen("screen-menu");
+           startMusic();
+           showScreen("screen-menu");
+        }
+       
+        if (target.closest("#btnMute")) {
+          toggleMute();
         }
 
         if (target.closest("#btnMenuHome, #btnHome, #btnFundingHome")) {
