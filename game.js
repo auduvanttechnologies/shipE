@@ -43,6 +43,31 @@ function $(id) {
     return document.getElementById(id);
 }
 
+const bgMusic = $("bgMusic");
+
+function startMusic() {
+    bgMusic.play().catch(() => {});
+}
+
+function stopMusic() {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+}
+
+function toggleMute() {
+    bgMusic.muted = !bgMusic.muted;
+
+    const btn = $("btnMute");
+
+    if (bgMusic.muted) {
+        btn.innerHTML = "🔇 <span>Unmute</span>";
+        btn.title = "Unmute music";
+    } else {
+        btn.innerHTML = "🔊 <span>Mute</span>";
+        btn.title = "Mute music";
+    }
+}
+
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
