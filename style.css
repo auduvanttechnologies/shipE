@@ -116,6 +116,23 @@ p{
   display:flex;
 }
 
+/*footer for Privacy Policy link on title screen */
+.site-footer {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.site-footer a {
+  color: #777;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: #555;
+  text-decoration: underline;
+}
+
 
 /* =========================================================
    TYPOGRAPHY
