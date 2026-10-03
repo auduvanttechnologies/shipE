@@ -64,7 +64,24 @@ function $(id) {
 const bgMusic = $("bgMusic");
 
 function startMusic() {
-    if (bgMusic) bgMusic.play().catch(() => {});
+    if (!bgMusic) return;
+ 
+    musicWanted = true;
+    bgMusic.volume = 0.6;
+ 
+    const attempt = bgMusic.play();
+    if (attempt && attempt.catch) {
+        attempt.catch(err => {
+            console.warn("[shipE] Music couldn't start:", err.name, "-", err.message);
+        });
+    }
+}
+ 
+/* If the browser blocked the first attempt, retry on the next click. */
+function retryMusicIfNeeded() {
+    if (musicWanted && bgMusic && bgMusic.paused && !bgMusic.error) {
+        startMusic();
+    }
 }
 
 function toggleMute() {
