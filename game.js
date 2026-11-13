@@ -1,29 +1,78 @@
 /* =========================================================
    shipE - Game JavaScript
-   Level 3 (Funding) + shared navigation
+   The startup simulation + shared navigation
    ========================================================= */
 
 const YEAR_SECONDS = 120;          // time per year (players can also end a year early)
 const MAX_ACTIONS_PER_YEAR = 3;    // action cards per year (personal spending is separate)
 const TOTAL_YEARS = 10;
 
+/* ---------------------------------------------------------
+   ECONOMY TUNING
+   Company value = (base + revenue x revenue multiple + users x value per user)
+                   x reputation x market share x R&D moat x investor sentiment
+   Cash is NOT part of company value.
+   --------------------------------------------------------- */
+
+const IDEA_VALUE = 400000;         // what a team + idea is worth before any traction
+
+const PROFILES = {
+    tech:    { revMultiple: 8, userValue: 1,   margin: 0.60, organic: 0.06 },   // margin = gross margin
+    nontech: { revMultiple: 3, userValue: 1.5, margin: 0.50, organic: 0.08 }
+};
+
+const SENTIMENT_FADE = 0.25;       // share of investor hype that wears off each year
+const CARD_FATIGUE = 0.6;          // each repeat of the same card in one year is 40% weaker
+const REFERENCE_REVENUE = 10000000; // from Year 2, costs are pegged to revenue: a $10M-revenue company pays the listed prices
+/* Rival strength. edge = execution bonus on growth; news = range of its yearly sentiment swing.
+   Tuned with sim/run.js: thoughtful play wins ~75-90% on Normal and ~50-70% on Hard. */
+const DIFFICULTY = {
+    normal: { label: "Normal", edge: 1.05, news: [0.94, 1.08] },
+    hard:   { label: "Hard",   edge: 1.20, news: [0.95, 1.10] }
+};
+
+function rivalSettings() {
+    return DIFFICULTY[state.difficulty] || DIFFICULTY.normal;
+}
+
+function setDifficulty(level) {
+    state.difficulty = DIFFICULTY[level] ? level : "normal";
+    document.querySelectorAll("[data-difficulty]").forEach(btn => {
+        btn.classList.toggle("selected", btn.getAttribute("data-difficulty") === state.difficulty);
+    });
+}
+
+function makeCompany() {
+    return {
+        cash: 100000,
+        revenue: 0,
+        users: 0,
+        marketShare: 10,
+        reputation: 50,
+        sentiment: 1,          // investor mood: events and funding rounds move this
+        rdLevel: 0,            // accumulated R&D: raises growth and the valuation multiple
+        companyValue: 0,
+        costScale: 0.025,
+        cardUses: {},          // uses of each card this year (diminishing returns)
+        highSalaryCount: 0,
+        lastMoves: []
+    };
+}
+
 const state = {
-    currentLevel: 1,
     currentYear: 1,
+    difficulty: "normal",    // "normal" | "hard" (kept between games)
 
     industry: null,          // "tech" | "nontech"
     startupType: null,       // { name, type, condition }
 
-    companyValue: 100000,
-    computerValue: 100000,
-    valueAtYearStart: 100000,
+    // Player company (fields kept on state so events can read them directly)
+    ...makeCompany(),
 
-    users: 0,
-    revenue: 0,
-    cash: 100000,
-
-    reputation: 50,
-    marketShare: 10,
+    computerValue: 0,
+    valueAtYearStart: 0,
+    rival: makeCompany(),
+    costScale: 1,
 
     cofounder: true,
     cofounderName: "Your Cofounder",
@@ -39,7 +88,6 @@ const state = {
 
     personalTaken: 0,        // total company cash spent on yourself
     personalSpentThisYear: false,
-    highSalaryCount: 0,
 
     actionsThisYear: 0,
     lastYearActions: 0,
@@ -62,13 +110,14 @@ function $(id) {
 }
 
 const bgMusic = $("bgMusic");
+let musicWanted = false;
 
 function startMusic() {
     if (!bgMusic) return;
- 
+
     musicWanted = true;
     bgMusic.volume = 0.6;
- 
+
     const attempt = bgMusic.play();
     if (attempt && attempt.catch) {
         attempt.catch(err => {
@@ -76,10 +125,10 @@ function startMusic() {
         });
     }
 }
- 
+
 /* If the browser blocked the first attempt, retry on the next click. */
 function retryMusicIfNeeded() {
-    if (musicWanted && bgMusic && bgMusic.paused && !bgMusic.error) {
+    if (musicWanted && bgMusic && bgMusic.paused && !bgMusic.muted && !bgMusic.error) {
         startMusic();
     }
 }
@@ -109,6 +158,10 @@ function showScreen(screenId) {
     if (target) {
         target.classList.add('active');
     }
+
+    // The music button floats top-right; hide it on the simulator, which has its own top bar.
+    const mute = $("btnMute");
+    if (mute) mute.classList.toggle("in-topbar", screenId === "screen-funding-simulator");
 }
 
 function setText(id, text) {
@@ -143,6 +196,10 @@ function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function randomFloat(min, max) {
+    return min + Math.random() * (max - min);
+}
+
 function chance(p) {
     return Math.random() < p;
 }
@@ -153,7 +210,7 @@ function clamp(value, min, max) {
 
 
 /* =========================================================
-   INITIALIZATION & LEVEL SELECTION
+   INITIALIZATION
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -161,28 +218,13 @@ document.addEventListener("DOMContentLoaded", () => {
     showScreen("screen-welcome");
 });
 
-function selectLevel(level) {
-    state.currentLevel = level;
-
-    if (level === 3) {
-        initializeLevel3();
-        showScreen("screen-level3-intro");
-    } else {
-        setText("introLevelNumber", level);
-        setText("introLevelNumberLarge", level);
-        setText("levelIntroTitle", level === 1 ? "Entrepreneurship" : "Running a Business");
-        setText(
-            "levelIntroCopy",
-            level === 1
-                ? "Revenue, cost, and the choices that make or break a business. Reach the finish line!"
-                : "Operations, management, costs, and finance — the systems behind the business."
-        );
-        showScreen("screen-level-intro");
-    }
+function openGame() {
+    initializeGame();
+    showScreen("screen-intro");
 }
 
-/* Stops every Level 3 timer. Called whenever the player leaves the simulator. */
-function leaveLevel3() {
+/* Stops every timer. Called whenever the player leaves the simulator. */
+function leaveGame() {
     clearInterval(state.timer);
     state.timer = null;
     state.yearStarted = false;
@@ -193,7 +235,7 @@ function leaveLevel3() {
 
 
 /* =========================================================
-   LEVEL 3 — SETUP
+   SETUP
    ========================================================= */
 
 const TECH_INDUSTRIES = [
@@ -216,22 +258,16 @@ const COFOUNDER_NAMES = ["Alex", "Jordan", "Sam", "Riley", "Casey", "Morgan", "T
 
 const WHEEL_COLORS = ["#7B5CFF", "#E5B84A", "#2EC4B6", "#FF6B6B", "#4CC9F0", "#F78C6B"];
 
-function initializeLevel3() {
-    leaveLevel3();
+function initializeGame() {
+    leaveGame();
 
     state.currentYear = 1;
     state.industry = null;
     state.startupType = null;
 
-    state.companyValue = 100000;
-    state.computerValue = 100000;
-    state.valueAtYearStart = 100000;
-
-    state.users = 0;
-    state.revenue = 0;
-    state.cash = 100000;
-    state.reputation = 50;
-    state.marketShare = 10;
+    Object.assign(state, makeCompany());
+    state.rival = makeCompany();
+    state.costScale = 1;
 
     state.cofounder = true;
     state.cofounderName = COFOUNDER_NAMES[random(0, COFOUNDER_NAMES.length - 1)];
@@ -247,12 +283,14 @@ function initializeLevel3() {
 
     state.personalTaken = 0;
     state.personalSpentThisYear = false;
-    state.highSalaryCount = 0;
 
     state.actionsThisYear = 0;
     state.lastYearActions = 0;
     state.timeRemaining = YEAR_SECONDS;
     state.history = [];
+
+    recomputeValues();
+    state.valueAtYearStart = state.companyValue;
 }
 
 function startFundingSimulator() {
@@ -380,13 +418,16 @@ function startYearOne() {
     state.actionsThisYear = 0;
     state.lastYearActions = 0;
     state.personalSpentThisYear = false;
+    state.cardUses = {};
+    state.rival.cardUses = {};
 
     applyYearStartConditions();
+    recomputeValues();
     state.valueAtYearStart = state.companyValue;
 
     ensureEndYearButton();
     renderYearActions();
-    updateLevel3Displays();
+    updateDisplays();
     startYearTimer();
 }
 
@@ -460,27 +501,30 @@ function endCurrentYear() {
     state.timer = null;
     state.yearStarted = false;
 
-    applyEndOfYearEffects();
-    tickComputer();
+    rivalTakeTurn();
+    applyEndOfYearEffects(state, true);
+    applyEndOfYearEffects(state.rival, false);
     state.lastYearActions = state.actionsThisYear;
     clampState();
 
     if (state.bankrupt || state.currentYear >= TOTAL_YEARS) {
-        finishLevel3();
+        finishGame();
         return;
     }
 
     state.currentYear++;
     state.actionsThisYear = 0;
     state.personalSpentThisYear = false;
+    state.cardUses = {};
+    state.rival.cardUses = {};
 
     showScreen("screen-funding-simulator");
     applyYearStartConditions();
-    state.valueAtYearStart = state.companyValue;
     clampState();
+    state.valueAtYearStart = state.companyValue;
 
     renderYearActions();
-    updateLevel3Displays();
+    updateDisplays();
     startYearTimer();
 }
 
@@ -489,33 +533,98 @@ function endCurrentYear() {
    ECONOMY HELPERS
    ========================================================= */
 
+function profile() {
+    return PROFILES[state.industry === "nontech" ? "nontech" : "tech"];
+}
+
+/* Company value from fundamentals. Cash is not included. */
+function valueOf(co) {
+    const p = profile();
+    const base = IDEA_VALUE + co.revenue * p.revMultiple + co.users * p.userValue;
+    const repFactor = 0.75 + co.reputation / 200;          // rep 0 → 0.75x, 50 → 1x, 100 → 1.25x
+    const shareFactor = 1 + co.marketShare / 200;          // 10% share → 1.05x, 40% → 1.2x
+    const moat = 1 + 0.05 * Math.sqrt(co.rdLevel);         // R&D raises the multiple, with diminishing returns
+    return Math.max(0, base * repFactor * shareFactor * moat * co.sentiment);
+}
+
+function recomputeValues() {
+    state.companyValue = valueOf(state);
+    state.rival.companyValue = valueOf(state.rival);
+    state.computerValue = state.rival.companyValue;
+}
+
+function clampCompany(co) {
+    co.reputation = clamp(co.reputation, 0, 100);
+    co.marketShare = clamp(co.marketShare, 0, 100);
+    co.users = Math.max(0, co.users);
+    co.revenue = Math.max(0, co.revenue);
+    co.sentiment = clamp(co.sentiment, 0.05, 50);
+}
+
 function clampState() {
-    state.reputation = clamp(state.reputation, 0, 100);
-    state.marketShare = clamp(state.marketShare, 0, 100);
-    state.users = Math.max(0, state.users);
-    state.revenue = Math.max(0, state.revenue);
-    state.companyValue = Math.max(0, state.companyValue);
-    state.computerValue = Math.max(0, state.computerValue);
+    clampCompany(state);
+    clampCompany(state.rival);
+
+    // You and the rival can't own more than 90% of the market between you.
+    const total = state.marketShare + state.rival.marketShare;
+    if (total > 90) {
+        const k = 90 / total;
+        state.marketShare *= k;
+        state.rival.marketShare *= k;
+    }
+
+    recomputeValues();
 }
 
-function addRep(amount) {
-    state.reputation = clamp(state.reputation + amount, 0, 100);
+function addRep(amount, co = state) {
+    co.reputation = clamp(co.reputation + amount, 0, 100);
 }
 
-function addShare(amount) {
-    state.marketShare = clamp(state.marketShare + amount, 0, 100);
+/* Market share is contested: half of what one company gains comes out of the other's share. */
+function addShare(amount, co = state) {
+    const other = co === state ? state.rival : state;
+    co.marketShare = clamp(co.marketShare + amount, 0, 100);
+    if (amount > 0) {
+        other.marketShare = clamp(other.marketShare - amount * 0.5, 1, 100);
+    }
 }
 
-function mulValue(multiplier) {
-    state.companyValue *= multiplier;
+/* Events and personal choices move investor sentiment, which scales the valuation multiple. */
+function mulValue(multiplier, co = state) {
+    co.sentiment *= multiplier;
+    recomputeValues();
 }
 
-function growUsers(pctMin, pctMax, floorMin, floorMax) {
-    state.users += Math.max(random(floorMin, floorMax), state.users * random(pctMin, pctMax) / 100);
+function growthBoost(co) {
+    return (1 + 0.14 * Math.sqrt(co.rdLevel)) * (co === state ? 1 : rivalSettings().edge);
 }
 
-function growRevenue(pctMin, pctMax, floorMin, floorMax) {
-    state.revenue += Math.max(random(floorMin, floorMax), state.revenue * random(pctMin, pctMax) / 100);
+function growUsers(pctMin, pctMax, floorMin, floorMax, co = state, strength = 1) {
+    const pct = randomFloat(pctMin, pctMax) / 100 * growthBoost(co);
+    co.users += Math.max(random(floorMin, floorMax), co.users * pct) * strength;
+}
+
+function growRevenue(pctMin, pctMax, floorMin, floorMax, co = state, strength = 1) {
+    const pct = randomFloat(pctMin, pctMax) / 100 * growthBoost(co);
+    co.revenue += Math.max(random(floorMin, floorMax), co.revenue * pct) * strength;
+}
+
+/* Scales a dollar amount written for a ~$10M-revenue company to the player's current size. */
+function money(amount) {
+    return Math.round(amount * state.costScale / 1000) * 1000;
+}
+
+/* Bigger companies run bigger budgets. Costs follow each company's own revenue
+   (what pays the bills), not its valuation. */
+function costScaleFor(co) {
+    return state.currentYear <= 1
+        ? 0.025
+        : clamp(Math.pow((co.revenue + 200000) / REFERENCE_REVENUE, 0.8), 0.03, 40);
+}
+
+function updateCostScale() {
+    state.costScale = costScaleFor(state);
+    state.rival.costScale = costScaleFor(state.rival);
 }
 
 /* Selling stock to investors / employees dilutes everyone already holding shares. */
@@ -529,16 +638,34 @@ function playerEquity() {
     return clamp(100 - state.cofounderEquity - state.outsideEquity, 0, 100);
 }
 
-/* 0.6 – 1.1: how impressed investors are with your first moves. Drives funding rounds. */
+/* 0.6 – 1.1: how impressed investors are with you. Drives funding rounds. */
 function performanceScore() {
     const repPart = clamp(state.reputation - 50, -50, 50) / 250;
     const momentum = state.lastYearActions >= 2 ? 0.1 : (state.lastYearActions === 1 ? 0 : -0.1);
-    return clamp(0.8 + repPart + momentum, 0.6, 1.1);
+    const lead = state.companyValue >= state.rival.companyValue ? 0.05 : -0.05;
+    return clamp(0.8 + repPart + momentum + lead, 0.6, 1.1);
 }
 
-function getAnnualBurn() {
-    const base = state.currentYear <= 1 ? 40000 : 2000000;
+function getAnnualBurn(co = state) {
+    const base = state.currentYear <= 1 ? 30000 : Math.round(1500000 * (co.costScale || 1) / 1000) * 1000;
+    if (co !== state) return base;
     return base * state.burnMultiplier + state.extraBurn;
+}
+
+/* A priced funding round. Investors pay a premium over today's value (the markup),
+   then buy `percentSold` of the company. The math matches what the toast says:
+   raise = pre-money x percent / (100 - percent). */
+function fundingRound(co, markup, percentSold) {
+    co.sentiment *= markup;
+    recomputeValues();
+
+    const preMoney = co.companyValue;
+    const raise = Math.round(preMoney * percentSold / (100 - percentSold));
+    co.cash += raise;
+
+    if (co === state) dilute(percentSold);
+
+    return { preMoney, raise, postMoney: preMoney + raise, percentSold };
 }
 
 
@@ -549,79 +676,112 @@ function getAnnualBurn() {
 const MARKET_TAILWINDS = { 5: 1.10, 6: 1.08, 7: 1.12 };
 
 function applyYearStartConditions() {
+    recomputeValues();
+
     switch (state.currentYear) {
         case 1:
             state.cash = Math.max(state.cash, 100000);
             break;
 
         case 2: {
-            // Series A — size depends on how you played year 1.
+            // Series A — the better your Year 1, the higher the price and the less you give up.
             const perf = performanceScore();
-            const raise = Math.round(50000000 * perf);
-            const valuation = 100000000 * perf;
+            const markup = 1.4 + (perf - 0.6) * 2.2;                  // 1.4x – 2.5x
+            const percent = Math.round(25 - (perf - 0.6) * 20);       // 25% – 15%
+            const round = fundingRound(state, markup, percent);
 
-            state.cash += raise;
-            state.companyValue = Math.max(state.companyValue, valuation);
-            state.users = Math.max(state.users, 10000000 * perf);
-            dilute(15);
+            fundingRound(state.rival, randomFloat(1.7, 2.3), 20);
 
-            state.computerValue = Math.max(state.computerValue, 100000000 * (0.85 + Math.random() * 0.3));
-
-            showToast(`Series A closed: ${formatMoney(raise)} raised at a ${formatMoney(state.companyValue)} valuation. Investors took 15%.`, 6000);
+            showToast(`Series A closed: you raised ${formatMoney(round.raise)} for ${round.percentSold}% of the company. Pre-money valuation ${formatMoney(round.preMoney)}, post-money ${formatMoney(round.postMoney)}.`, 7000);
             break;
         }
 
         case 3:
             if (state.industry === "tech") {
+                // Hypergrowth is earned: it multiplies the traction you already have.
                 const perf = performanceScore();
-                state.companyValue = Math.max(state.companyValue, 1000000000 * perf);
-                state.users = Math.max(state.users, 100000000 * perf);
-                state.revenue = Math.max(state.revenue, 200000000 * perf);
-                state.marketShare = Math.max(state.marketShare, 35 * perf);
+                const surge = 1.6 + (perf - 0.6) * 2;                 // 1.6x – 2.6x
+                state.users *= surge;
+                state.revenue *= surge;
+                addShare(4 * perf);
 
-                state.computerValue = Math.max(state.computerValue, 1000000000 * (0.8 + Math.random() * 0.4));
+                const rivalSurge = randomFloat(1.8, 2.4);
+                state.rival.users *= rivalSurge;
+                state.rival.revenue *= rivalSurge;
+                recomputeValues();
 
-                showToast(`Hypergrowth! Your tech company is now valued at ${formatMoney(state.companyValue)}.`, 5000);
+                const round = fundingRound(state, 1.15, 12);
+                fundingRound(state.rival, 1.15, 12);
+
+                showToast(`Hypergrowth! Users and revenue grew ${surge.toFixed(1)}x. Your Series B raised ${formatMoney(round.raise)} for 12%.`, 7000);
             }
             break;
 
         case 4:
             addRep(5);
+            if (state.industry === "nontech") {
+                // Non-tech companies raise a growth round later, once revenue is proven.
+                const perf = performanceScore();
+                const round = fundingRound(state, 1 + (perf - 0.6) * 0.8, 15);
+                fundingRound(state.rival, randomFloat(1.15, 1.35), 15);
+                showToast(`Growth round closed: you raised ${formatMoney(round.raise)} for 15% at a ${formatMoney(round.preMoney)} pre-money valuation.`, 7000);
+            }
             break;
 
         case 5:
         case 6:
         case 7: {
             const tailwind = MARKET_TAILWINDS[state.currentYear];
-            state.companyValue *= tailwind;
-            state.computerValue *= tailwind;
+            state.sentiment *= tailwind;
+            state.rival.sentiment *= tailwind;
             showToast(`Market tailwind: valuations across the market rose ${Math.round((tailwind - 1) * 100)}%.`, 4000);
             break;
         }
     }
 
-    state.companyValue = Math.max(0, state.companyValue);
+    recomputeValues();
+    updateCostScale();
 }
 
-function applyEndOfYearEffects() {
-    if (state.bankrupt) return;
+/* Year-end for one company: organic growth, profit, burn, and the debt check. */
+function applyEndOfYearEffects(co, isPlayer) {
+    if (isPlayer && state.bankrupt) return;
+    const p = profile();
 
-    // Operating costs, and a small profit margin on revenue.
-    state.cash -= getAnnualBurn();
-    state.cash += state.revenue * 0.02;
+    // Hype fades: a quarter of any investor premium (or discount) wears off each year
+    // unless real results replace it.
+    co.sentiment = 1 + (co.sentiment - 1) * (1 - SENTIMENT_FADE);
 
-    // Public companies ride the market's mood.
-    if (state.ipo) {
-        state.companyValue *= 1 + random(-3, 3) / 100;
+    // Existing customers bring organic growth; share and reputation help.
+    const organic = p.organic + co.marketShare / 400 + (co.reputation - 50) / 500;
+    co.revenue *= 1 + Math.max(-0.1, organic);
+    co.users *= 1 + Math.max(-0.1, organic * 0.8);
+
+    // Gross profit on revenue minus the cost of running the company (burn).
+    co.cash += co.revenue * p.margin;
+    co.cash -= getAnnualBurn(co);
+
+    if (isPlayer && state.ipo) {
+        co.sentiment *= 1 + random(-3, 3) / 100;
     }
 
-    const reputationMultiplier = 1 + ((state.reputation - 50) / 1000);
-    state.companyValue *= reputationMultiplier;
-    state.companyValue *= 1 + (state.marketShare / 10000);
+    if (!isPlayer) {
+        // The rival gets its own news each year, good and bad, like your events do.
+        const news = rivalSettings().news;
+        co.sentiment *= randomFloat(news[0], news[1]);
+        addRep(random(-2, 5), co);
+        addShare(randomFloat(0, 2.5), co);
+        if (state.currentYear === 3 && state.industry === "tech") addShare(8, co);   // its own press moment
+        if (state.currentYear === 8) { co.sentiment *= 0.9; co.revenue *= 0.9; }   // recession
+        if (state.currentYear === 9) co.sentiment *= randomFloat(0.95, 1.0);         // audit season
+        if (state.currentYear === 10) { co.revenue *= randomFloat(0.78, 0.95); co.users *= 0.85; }   // final-year shock
+        if (co.cash < 0) { co.sentiment *= 0.9; co.cash = 0; }                       // rival never goes bankrupt
+        return;
+    }
 
-    if (state.cash < 0) {
+    if (co.cash < 0) {
         state.debtYears++;
-        state.companyValue *= 0.85;
+        co.sentiment *= 0.85;
         addRep(-5);
 
         if (state.debtYears >= 2) {
@@ -632,17 +792,51 @@ function applyEndOfYearEffects() {
     } else {
         state.debtYears = 0;
     }
-
-    state.companyValue = Math.max(0, state.companyValue);
 }
 
-/* The computer rival grows once per year, mirrors the funding rounds, and suffers the late-game crashes. */
-function tickComputer() {
-    state.computerValue *= 1 + random(13, 26) / 100;
 
-    if (state.currentYear === 8) state.computerValue *= 0.88;
-    if (state.currentYear === 9) state.computerValue *= 0.93;
-    if (state.currentYear === 10) state.computerValue *= 0.75;
+/* =========================================================
+   THE RIVAL
+   Plays the same cards with the same costs and rules, picks
+   different cards each year, and reacts to what you do.
+   ========================================================= */
+
+function rivalTakeTurn() {
+    const r = state.rival;
+    const year = state.currentYear;
+    const actions = getActionsForYear(r);
+
+    const weights = {
+        product: 3.5,
+        marketing: state.industry === "nontech" ? 3 : 2,
+        expansion: 2.5,
+        rd: year <= 5 ? 3.5 : 1,            // research pays off later, so the rival front-loads it
+        salary: state.highSalaryCount > 0 || year === 3 ? 1 : 0.3
+    };
+    if (state.marketShare > r.marketShare) weights.marketing += 2;      // fight back for share
+    if (state.companyValue > r.companyValue) weights.product += 1.5;    // chase the leader
+    if (year >= 7) weights.expansion += 1.5;
+
+    // Like a real startup, the rival raises a bridge round when it runs low on cash.
+    if (r.cash < getAnnualBurn(r) && year > 1) fundingRound(r, 1, 10);
+
+    const reserve = getAnnualBurn(r) * 0.5;
+    const picks = [];
+    for (let i = 0; i < MAX_ACTIONS_PER_YEAR; i++) {
+        const options = actions.filter(a => a.id !== "self" && !picks.includes(a.id) && r.cash - a.cost >= reserve);
+        if (!options.length) break;
+
+        const total = options.reduce((s, a) => s + weights[a.id], 0);
+        let roll = Math.random() * total;
+        const choice = options.find(a => (roll -= weights[a.id]) <= 0) || options[0];
+
+        picks.push(choice.id);
+        r.cash -= choice.cost;
+        applyCardEffects(r, choice.id);
+    }
+
+    r.lastMoves = picks;
+    clampState();
 }
 
 
@@ -650,8 +844,14 @@ function tickComputer() {
    ACTION CARDS & EXECUTION
    ========================================================= */
 
-function getActionsForYear() {
-    const costMultiplier = state.currentYear <= 1 ? 1 : 40;
+const CARD_BASE_COSTS = { product: 25000, marketing: 20000, expansion: 35000, rd: 30000, salary: 20000 };
+
+function getActionsForYear(co = state) {
+    // Year 1 prices are fixed. From Year 2, prices grow with the size of the company.
+    const scale = co.costScale || 1;
+    const cost = id => state.currentYear <= 1
+        ? CARD_BASE_COSTS[id]
+        : Math.round(CARD_BASE_COSTS[id] * 40 * scale / 1000) * 1000;
 
     return [
         {
@@ -659,35 +859,35 @@ function getActionsForYear() {
             icon: "🛠️",
             title: "Develop Product",
             description: "Build a new feature or improve the company's core product.",
-            cost: 25000 * costMultiplier
+            cost: cost("product")
         },
         {
             id: "marketing",
             icon: "📣",
             title: "Invest in Marketing",
-            description: "Increase brand awareness and acquire new customers.",
-            cost: 20000 * costMultiplier
+            description: "Increase brand awareness and win customers (and share) from rivals.",
+            cost: cost("marketing")
         },
         {
             id: "expansion",
             icon: "🏢",
             title: "Expand Operations",
             description: "Grow into new territories or open new offices.",
-            cost: 35000 * costMultiplier
+            cost: cost("expansion")
         },
         {
             id: "rd",
             icon: "🔬",
             title: "Invest in R&D",
-            description: "Fund research that creates long-term competitive advantages.",
-            cost: 30000 * costMultiplier
+            description: "Research that makes all your future growth stronger. Pays off over years.",
+            cost: cost("rd")
         },
         {
             id: "salary",
             icon: "💵",
             title: "High Salaries",
             description: "Pay your team above-market. Loyal employees are harder to poach.",
-            cost: 20000 * costMultiplier
+            cost: cost("salary")
         },
         {
             id: "self",
@@ -697,6 +897,43 @@ function getActionsForYear() {
             cost: 0
         }
     ];
+}
+
+/* What each card does. Shared by you and the rival.
+   Repeating a card in the same year gives diminishing returns. */
+function applyCardEffects(co, id) {
+    const uses = co.cardUses[id] || 0;
+    const s = Math.pow(CARD_FATIGUE, uses);
+    co.cardUses[id] = uses + 1;
+
+    switch (id) {
+        case "product":
+            growUsers(8, 14, 10000, 50000, co, s);
+            growRevenue(8, 14, 10000, 100000, co, s);
+            addRep(3 * s, co);
+            co.sentiment *= 1 + 0.01 * s;
+            break;
+        case "marketing":
+            growUsers(12, 20, 25000, 150000, co, s);
+            growRevenue(state.industry === "nontech" ? 8 : 4, state.industry === "nontech" ? 14 : 8, 10000, 60000, co, s);   // new customers pay
+            addShare(randomFloat(1, 4) * s, co);
+            break;
+        case "expansion":
+            addShare(randomFloat(1, 3) * s, co);
+            growRevenue(10, 18, 25000, 200000, co, s);
+            break;
+        case "rd":
+            co.rdLevel += s;
+            addRep(3 * s, co);
+            growUsers(2, 4, 5000, 30000, co, s);
+            break;
+        case "salary":
+            addRep(-3, co);
+            co.sentiment *= 0.99;
+            co.highSalaryCount++;
+            break;
+    }
+    return s;
 }
 
 function setCardDisabled(element, disabled, reason) {
@@ -748,12 +985,18 @@ function renderYearActions() {
 
             container.appendChild(card);
         } else {
+            const uses = state.cardUses[action.id] || 0;
+            const fatigueNote = uses > 0
+                ? `<p class="card-fatigue">Used ${uses}× this year: ${Math.round(Math.pow(CARD_FATIGUE, uses) * 100)}% effect</p>`
+                : "";
+
             const btn = document.createElement("button");
             btn.className = "funding-decision-card";
             btn.innerHTML = `
                 <div class="funding-card-icon">${action.icon}</div>
                 <h3>${action.title}</h3>
                 <p>${action.description}</p>
+                ${fatigueNote}
                 <div class="funding-card-footer">
                     <span>Cost</span>
                     <strong>${formatMoney(action.cost)}</strong>
@@ -779,8 +1022,16 @@ function updateDecisionHeader() {
     if (!subtitle) return;
 
     const left = MAX_ACTIONS_PER_YEAR - state.actionsThisYear;
-    subtitle.textContent = `Actions left this year: ${left} of ${MAX_ACTIONS_PER_YEAR}. Your choices affect the future of your company.`;
+    subtitle.textContent = `Actions left this year: ${left} of ${MAX_ACTIONS_PER_YEAR}. Repeating a card in the same year gives diminishing returns.`;
 }
+
+const ACTION_TOASTS = {
+    product: "Product development paid off. Users and revenue grew.",
+    marketing: "Marketing brought in new customers and took share from the rival.",
+    expansion: "Your company expanded its operations. Revenue and share grew.",
+    rd: "R&D added to your long-term advantage. All future growth gets stronger.",
+    salary: "High salaries paid out. Your team is loyal, but investors noticed."
+};
 
 function executeAction(action) {
     if (state.bankrupt || !state.yearStarted) return;
@@ -798,43 +1049,16 @@ function executeAction(action) {
     state.actionsThisYear++;
     state.cash -= action.cost;
 
-    switch (action.id) {
-        case "product":
-            growUsers(3, 6, 10000, 50000);
-            growRevenue(3, 6, 10000, 100000);
-            mulValue(1.06);
-            addRep(3);
-            showToast("Product development paid off. Your company is growing.");
-            break;
-        case "marketing":
-            growUsers(4, 8, 25000, 150000);
-            addShare(random(1, 5));
-            mulValue(1.04);
-            showToast("Marketing brought in new customers.");
-            break;
-        case "expansion":
-            addShare(random(1, 4));
-            growRevenue(4, 8, 25000, 200000);
-            mulValue(1.05);
-            showToast("Your company expanded its operations.");
-            break;
-        case "rd":
-            mulValue(1.08);
-            addRep(5);
-            growUsers(1, 3, 5000, 50000);
-            showToast("R&D created a long-term advantage.");
-            break;
-        case "salary":
-            addRep(-3);
-            mulValue(0.97);
-            state.highSalaryCount++;
-            showToast("High salaries paid out. Your team is loyal, but investors noticed.");
-            break;
-    }
-
+    const before = state.companyValue;
+    const strength = applyCardEffects(state, action.id);
     clampState();
+
+    const delta = state.companyValue - before;
+    const weak = strength < 1 ? ` (repeat: ${Math.round(strength * 100)}% effect)` : "";
+    showToast(`${ACTION_TOASTS[action.id]} Value ${delta >= 0 ? "+" : ""}${formatMoney(delta)}${weak}.`);
+
     renderYearActions();
-    updateLevel3Displays();
+    updateDisplays();
 }
 
 function executePersonalSpending(percentage) {
@@ -856,14 +1080,13 @@ function executePersonalSpending(percentage) {
     state.personalSpentThisYear = true;
 
     addRep(-percentage / 5);
-    state.companyValue *= 1 - (percentage / 500);
+    state.sentiment *= 1 - (percentage / 500);
 
     showToast(`You spent ${formatMoney(spending)} of the company's cash on yourself.`);
     clampState();
     renderYearActions();
-    updateLevel3Displays();
+    updateDisplays();
 }
-
 
 /* =========================================================
    EVENTS SYSTEM
@@ -1073,12 +1296,12 @@ function eventYear3() {
             choices: [
                 {
                     label: "Launch a hype campaign",
-                    hint: "Spend $2M to ride the wave",
+                    hint: `Spend ${formatMoney(money(2000000))} to ride the wave`,
                     apply: () => {
-                        state.cash -= 2000000;
+                        state.cash -= money(2000000);
                         addShare(18);
                         mulValue(1.2);
-                        growUsers(5, 10, 100000, 500000);
+                        growUsers(5, 10, money(100000), money(500000));
                         return "Your campaign went viral. Sign-ups are through the roof.";
                     }
                 },
@@ -1100,20 +1323,20 @@ function eventYear3() {
         text: "A government small-business program has picked your company for funding. Which package do you take?",
         choices: [
             {
-                label: "Grant + $6M loan",
-                hint: "$10M now, $500K/year in repayments",
+                label: `Grant + ${formatMoney(money(6000000))} loan`,
+                hint: `${formatMoney(money(10000000))} now, ${formatMoney(money(500000))}/year in repayments`,
                 apply: () => {
-                    state.cash += 10000000;
-                    state.extraBurn += 500000;
+                    state.cash += money(10000000);
+                    state.extraBurn += money(500000);
                     mulValue(1.1);
-                    return "You pocketed $10M. The loan payments will weigh on your budget for years.";
+                    return `You pocketed ${formatMoney(money(10000000))}. The loan payments will weigh on your budget for years.`;
                 }
             },
             {
                 label: "Grant only",
-                hint: "$4M, no debt",
+                hint: `${formatMoney(money(4000000))}, no debt`,
                 apply: () => {
-                    state.cash += 4000000;
+                    state.cash += money(4000000);
                     mulValue(1.1);
                     addRep(2);
                     return "No strings, no debt. Investors like the discipline.";
@@ -1149,9 +1372,9 @@ function eventTalentWar() {
         choices: [
             {
                 label: "Make a counter-offer",
-                hint: "Costs $1.5M",
+                hint: `Costs ${formatMoney(money(1500000))}`,
                 apply: () => {
-                    state.cash -= 1500000;
+                    state.cash -= money(1500000);
                     mulValue(1.02);
                     addRep(1);
                     return "She stays, and she brings a few friends with her.";
@@ -1200,15 +1423,15 @@ function eventIndustry() {
                                 mulValue(1.35); addRep(8); addShare(3);
                                 return "Clean orbit! The headlines write themselves.";
                             }
-                            mulValue(0.8); state.cash -= 3000000; addRep(-6);
+                            mulValue(0.8); state.cash -= money(3000000); addRep(-6);
                             return "The rocket broke apart 40 seconds after liftoff. Cleanup and insurance cost you dearly.";
                         }
                     },
                     {
                         label: "Run more tests",
-                        hint: "Costs $1.5M, safer",
+                        hint: `Costs ${formatMoney(money(1500000))}, safer`,
                         apply: () => {
-                            state.cash -= 1500000;
+                            state.cash -= money(1500000);
                             if (chance(0.85)) {
                                 mulValue(1.12); addRep(3);
                                 return "The extra checks caught a fuel valve issue. The next launch is flawless.";
@@ -1226,9 +1449,9 @@ function eventIndustry() {
                 choices: [
                     {
                         label: "Hire a compliance team",
-                        hint: "Costs $2M",
+                        hint: `Costs ${formatMoney(money(2000000))}`,
                         apply: () => {
-                            state.cash -= 2000000; addRep(4); mulValue(1.03);
+                            state.cash -= money(2000000); addRep(4); mulValue(1.03);
                             return "You're now on the regulators' good side, and customers trust you more.";
                         }
                     },
@@ -1240,8 +1463,8 @@ function eventIndustry() {
                                 mulValue(1.1);
                                 return "The regulator agrees you're exempt. You just saved millions.";
                             }
-                            state.cash -= 4000000; addRep(-6); mulValue(0.92);
-                            return "The regulator disagreed, and fined you $4M.";
+                            state.cash -= money(4000000); addRep(-6); mulValue(0.92);
+                            return `The regulator disagreed, and fined you ${formatMoney(money(4000000))}.`;
                         }
                     },
                     {
@@ -1283,9 +1506,9 @@ function eventIndustry() {
                     },
                     {
                         label: "Open-core model",
-                        hint: "Costs $1M for a community team",
+                        hint: `Costs ${formatMoney(money(1000000))} for a community team`,
                         apply: () => {
-                            state.cash -= 1000000; state.users *= 1.1; state.revenue *= 1.03; addRep(3);
+                            state.cash -= money(1000000); state.users *= 1.1; state.revenue *= 1.03; addRep(3);
                             return "Free basics, paid extras. A balanced strategy that kept everybody happy.";
                         }
                     }
@@ -1299,9 +1522,9 @@ function eventIndustry() {
                 choices: [
                     {
                         label: "Release a free scanner",
-                        hint: "Costs $1M, big goodwill",
+                        hint: `Costs ${formatMoney(money(1000000))}, big goodwill`,
                         apply: () => {
-                            state.cash -= 1000000; addRep(7); state.users *= 1.15;
+                            state.cash -= money(1000000); addRep(7); state.users *= 1.15;
                             return "Your free scanner protected thousands of companies. You became the trusted name.";
                         }
                     },
@@ -1309,7 +1532,7 @@ function eventIndustry() {
                         label: "Sell an emergency package",
                         hint: "Quick cash, bad optics",
                         apply: () => {
-                            state.cash += 2000000; state.revenue *= 1.15; addRep(-2);
+                            state.cash += money(2000000); state.revenue *= 1.15; addRep(-2);
                             return "Sales spiked, but critics accused you of profiteering.";
                         }
                     }
@@ -1329,24 +1552,24 @@ function eventIndustry() {
                                 mulValue(1.4); addRep(5);
                                 return "Production worked. Every chipmaker wants a meeting.";
                             }
-                            mulValue(0.85); state.cash -= 3000000; addRep(-5);
+                            mulValue(0.85); state.cash -= money(3000000); addRep(-5);
                             return "The first batch had serious defects. Recalls are expensive.";
                         }
                     },
                     {
                         label: "Publish and patent",
-                        hint: "Costs $0.5M",
+                        hint: `Costs ${formatMoney(money(500000))}`,
                         apply: () => {
-                            state.cash -= 500000; mulValue(1.1); addRep(4);
+                            state.cash -= money(500000); mulValue(1.1); addRep(4);
                             return "Your patents give you a strong moat and academic credibility.";
                         }
                     },
                     {
                         label: "License it to a chipmaker",
-                        hint: "Get $6M now",
+                        hint: `Get ${formatMoney(money(6000000))} now`,
                         apply: () => {
-                            state.cash += 6000000;
-                            return "A big chipmaker paid $6M up front for the license.";
+                            state.cash += money(6000000);
+                            return `A big chipmaker paid ${formatMoney(money(6000000))} up front for the license.`;
                         }
                     }
                 ]
@@ -1359,9 +1582,9 @@ function eventIndustry() {
                 choices: [
                     {
                         label: "Overhaul security",
-                        hint: "Costs $2M",
+                        hint: `Costs ${formatMoney(money(2000000))}`,
                         apply: () => {
-                            state.cash -= 2000000; addRep(5); mulValue(1.04);
+                            state.cash -= money(2000000); addRep(5); mulValue(1.04);
                             return "Your security upgrade makes you the safest option in the market.";
                         }
                     },
@@ -1369,7 +1592,7 @@ function eventIndustry() {
                         label: "Minimal compliance",
                         hint: "Cheap, 25% chance of a breach",
                         apply: () => {
-                            state.cash -= 300000;
+                            state.cash -= money(300000);
                             if (chance(0.75)) {
                                 mulValue(1.01);
                                 return "You squeaked by this year without any problems.";
@@ -1396,9 +1619,9 @@ function eventIndustry() {
                 choices: [
                     {
                         label: "Absorb the cost",
-                        hint: "Costs $2.5M",
+                        hint: `Costs ${formatMoney(money(2500000))}`,
                         apply: () => {
-                            state.cash -= 2500000; addRep(2);
+                            state.cash -= money(2500000); addRep(2);
                             return "You ate the loss and kept every client happy.";
                         }
                     },
@@ -1415,9 +1638,9 @@ function eventIndustry() {
                     },
                     {
                         label: "Switch suppliers",
-                        hint: "Costs $1M, causes delays",
+                        hint: `Costs ${formatMoney(money(1000000))}, causes delays`,
                         apply: () => {
-                            state.cash -= 1000000; mulValue(1.02); addRep(-1);
+                            state.cash -= money(1000000); mulValue(1.02); addRep(-1);
                             return "A cheaper supplier saved the margin, though deliveries ran late.";
                         }
                     }
@@ -1463,17 +1686,17 @@ function eventIndustry() {
                 choices: [
                     {
                         label: "Pivot to first-party data",
-                        hint: "Costs $2M",
+                        hint: `Costs ${formatMoney(money(2000000))}`,
                         apply: () => {
-                            state.cash -= 2000000; mulValue(1.08); addRep(3);
+                            state.cash -= money(2000000); mulValue(1.08); addRep(3);
                             return "Owning your audience data turned a crisis into an advantage.";
                         }
                     },
                     {
                         label: "Switch to contextual ads",
-                        hint: "Costs $0.5M",
+                        hint: `Costs ${formatMoney(money(500000))}`,
                         apply: () => {
-                            state.cash -= 500000; mulValue(1.02);
+                            state.cash -= money(500000); mulValue(1.02);
                             return "Contextual targeting works well enough. Business continues.";
                         }
                     },
@@ -1499,17 +1722,17 @@ function eventIndustry() {
                 choices: [
                     {
                         label: "Scale production fast",
-                        hint: "Costs $4M",
+                        hint: `Costs ${formatMoney(money(4000000))}`,
                         apply: () => {
-                            state.cash -= 4000000; state.revenue *= 1.25; mulValue(1.12); addShare(4);
+                            state.cash -= money(4000000); state.revenue *= 1.25; mulValue(1.12); addShare(4);
                             return "Your factories can't keep up with demand. A good problem to have.";
                         }
                     },
                     {
                         label: "Lock in supply contracts",
-                        hint: "Costs $1.5M",
+                        hint: `Costs ${formatMoney(money(1500000))}`,
                         apply: () => {
-                            state.cash -= 1500000; state.revenue *= 1.1; mulValue(1.05); addRep(2);
+                            state.cash -= money(1500000); state.revenue *= 1.1; mulValue(1.05); addRep(2);
                             return "Long-term contracts gave you steady, reliable growth.";
                         }
                     },
@@ -1521,8 +1744,8 @@ function eventIndustry() {
                                 mulValue(1.18); addRep(3);
                                 return "Stricter rules pushed out your lower-quality competitors.";
                             }
-                            state.cash -= 1000000; addRep(-2);
-                            return "The lobbying went nowhere and cost you $1M.";
+                            state.cash -= money(1000000); addRep(-2);
+                            return `The lobbying went nowhere and cost you ${formatMoney(money(1000000))}.`;
                         }
                     }
                 ]
@@ -1536,9 +1759,9 @@ function eventIndustry() {
         choices: [
             {
                 label: "Adapt quickly",
-                hint: "Costs $1M",
+                hint: `Costs ${formatMoney(money(1000000))}`,
                 apply: () => {
-                    state.cash -= 1000000; mulValue(1.06);
+                    state.cash -= money(1000000); mulValue(1.06);
                     return "You stayed ahead of the change.";
                 }
             },
@@ -1575,7 +1798,7 @@ function eventStrategicOffer() {
                 label: "Take a strategic investment",
                 hint: "They buy 6% and give you cash",
                 apply: () => {
-                    const cashIn = state.companyValue * 0.06;
+                    const cashIn = state.companyValue * 6 / 94;   // 6% of the post-investment company
                     state.cash += cashIn;
                     dilute(6);
                     addRep(1);
@@ -1603,7 +1826,7 @@ function eventStrategicOffer() {
 /* ---------- Year 7: IPO window ---------- */
 
 function eventIPO() {
-    const raise = state.companyValue * 0.12;
+    const raise = state.companyValue * 12 / 88;   // selling 12% of the post-IPO company
 
     return {
         title: "IPO WINDOW",
@@ -1613,7 +1836,7 @@ function eventIPO() {
                 label: "Go public",
                 hint: "Raise cash, sell 12%, face scrutiny",
                 apply: () => {
-                    const cashIn = state.companyValue * 0.12;
+                    const cashIn = state.companyValue * 12 / 88;
                     state.cash += cashIn;
                     dilute(12);
                     state.ipo = true;
@@ -1674,7 +1897,7 @@ function eventRecession() {
                 label: "Hold steady",
                 hint: "Ride it out",
                 apply: () => {
-                    mulValue(0.85 * pub);
+                    mulValue(0.93 * pub);
                     state.revenue *= 0.85;
                     state.marketShare *= 0.95;
                     return "You waited out the storm, and took the full hit.";
@@ -1688,7 +1911,7 @@ function eventRecession() {
 
 function eventAudit() {
     const hasPersonal = state.personalTaken > 0;
-    const fine = Math.round(random(500000, 5000000) * (state.ipo ? 1.5 : 1));
+    const fine = Math.round(money(random(500000, 5000000)) * (state.ipo ? 1.5 : 1));
 
     const settlePersonal = () => {
         if (!hasPersonal) return "";
@@ -1721,9 +1944,9 @@ function eventAudit() {
             },
             {
                 label: "Hire elite tax lawyers",
-                hint: "Costs $1.5M, 60% chance to cut the fine by 70%",
+                hint: `Costs ${formatMoney(money(1500000))}, 60% chance to cut the fine by 70%`,
                 apply: () => {
-                    state.cash -= 1500000;
+                    state.cash -= money(1500000);
                     if (chance(0.6)) {
                         const reduced = Math.round(fine * 0.3);
                         state.cash -= reduced;
@@ -1769,10 +1992,10 @@ function eventFinalYear() {
                 label: "Brace for impact",
                 hint: "The full hit, no extra spending",
                 apply: () => {
-                    state.users *= 0.75;
-                    state.revenue *= 0.75;
-                    state.marketShare *= 0.75;
-                    mulValue(0.72);
+                    // Lower revenue and users already lower the valuation, so there's no extra multiplier.
+                    state.users *= 0.8;
+                    state.revenue *= 0.8;
+                    state.marketShare *= 0.85;
                     return "You held the line and took the full blow.";
                 }
             },
@@ -1782,13 +2005,13 @@ function eventFinalYear() {
                 apply: () => {
                     state.cash -= Math.max(0, state.cash * 0.1);
                     if (chance(0.5)) {
-                        state.users *= 0.9;
-                        mulValue(0.9);
+                        state.users *= 0.95;
+                        state.revenue *= 0.97;
                         return "The gamble worked: your final push kept customers on board.";
                     }
                     state.users *= 0.7;
                     state.revenue *= 0.7;
-                    mulValue(0.58);
+                    mulValue(0.9);
                     return "The gamble failed. You spent big and customers left anyway.";
                 }
             },
@@ -1798,8 +2021,8 @@ function eventFinalYear() {
                 apply: () => {
                     state.cash -= Math.max(0, state.cash * 0.08);
                     state.users *= 0.9;
+                    state.revenue *= 0.88;
                     state.marketShare *= 0.9;
-                    mulValue(0.75);
                     addRep(-3);
                     return "A last-minute pivot opened a new market, and softened the blow.";
                 }
@@ -1826,7 +2049,34 @@ const YEAR_LESSONS = [
     { title: "The final stretch", text: "Valuation can swing sharply with customers, growth, and market mood. Lasting companies are built over many years." }
 ];
 
+/* Headline card at the top of each year (it used to stay on Year 1 forever). */
+function yearHeadline() {
+    const y = state.currentYear;
+    const runway = state.cash > 0 ? state.cash / Math.max(1, getAnnualBurn()) : 0;
+    const status = `You have ${formatMoney(state.cash)} in the bank and burn about ${formatMoney(getAnnualBurn())} a year.`;
+
+    const headlines = {
+        1: ["Build the Company", "Your startup has $100,000 in pre-seed funding. Spend it on traction: Series A investors will price your company on what you build this year."],
+        2: ["Series A Year", `You just raised your Series A and now own ${formatPercent(playerEquity())} of the company. ${status}`],
+        3: [state.industry === "tech" ? "Hypergrowth" : "Proving the Model", status],
+        4: ["Scaling Up", status],
+        5: ["Market Tailwind", `Valuations across the market are rising. ${status}`],
+        6: ["Big Players Are Watching", status],
+        7: ["Hot Markets", `The IPO window may open this year. ${status}`],
+        8: ["Storm Clouds", `Economists are warning about a downturn. ${status}`],
+        9: ["Under the Microscope", status],
+        10: ["The Final Year", `Whoever is worth more at the end of this year wins. ${status}`]
+    };
+    const [title, text] = headlines[y] || headlines[1];
+    return { title, text: runway < 1 && y > 1 ? text + " Your runway is under a year: be careful." : text };
+}
+
 function updateYearExplanation() {
+    const head = yearHeadline();
+    setText("fundingEventEyebrow", "YEAR " + state.currentYear);
+    setText("fundingEventTitle", head.title);
+    setText("fundingEventText", head.text);
+
     const box = $("fundingBottomExplanation");
     if (!box) return;
 
@@ -1835,6 +2085,18 @@ function updateYearExplanation() {
     const body = box.querySelector("p");
     if (title) title.textContent = lesson.title;
     if (body) body.textContent = lesson.text;
+}
+
+const CARD_NAMES = { product: "Product", marketing: "Marketing", expansion: "Expansion", rd: "R&D", salary: "High Salaries" };
+
+function updateRivalMoves() {
+    const moves = state.rival.lastMoves || [];
+    setText(
+        "rivalLastMoves",
+        state.currentYear === 1 || !moves.length
+            ? "The rival's moves will show here after each year."
+            : "Last year the rival played: " + moves.map(m => CARD_NAMES[m]).join(", ") + "."
+    );
 }
 
 function setPie(id, fraction, color) {
@@ -1846,7 +2108,7 @@ function setPie(id, fraction, color) {
         `conic-gradient(${color} 0deg ${degrees}deg, rgba(255,255,255,0.14) ${degrees}deg 360deg)`;
 }
 
-function updateLevel3Displays() {
+function updateDisplays() {
     setText("fundingYearNumber", state.currentYear);
     setText("fundingIndustryTop", state.startupType ? state.startupType.name : "Startup");
 
@@ -1897,6 +2159,9 @@ function updateLevel3Displays() {
     // Rival
     setText("computerCompanyValue", formatMoney(state.computerValue));
     setText("computerPieLabel", formatMoney(state.computerValue));
+    setText("rivalShare", state.rival.marketShare.toFixed(1) + "%");
+    setText("rivalRevenue", formatMoney(state.rival.revenue));
+    updateRivalMoves();
 
     const isAhead = state.companyValue >= state.computerValue;
     setText("playerRank", isAhead ? "#1" : "#2");
@@ -1960,8 +2225,8 @@ function updateProgressBar() {
    FINAL SCREEN & RESTART
    ========================================================= */
 
-function finishLevel3() {
-    leaveLevel3();
+function finishGame() {
+    leaveGame();
     showScreen("screen-funding-finish");
 
     const bankrupt = state.bankrupt;
@@ -1979,10 +2244,10 @@ function finishLevel3() {
         desc = "Your company ran out of cash two years in a row and creditors took over. Watch your burn rate, and don't treat investor money like your own.";
     } else if (playerVal > computerVal) {
         title = "YOU WIN!";
-        desc = "Your startup outperformed the rival computer business across 10 years!";
+        desc = `Your startup beat the rival by ${formatMoney(playerVal - computerVal)} after 10 years.`;
     } else if (computerVal > playerVal) {
         title = "COMPUTER WINS!";
-        desc = "The computer rival built a larger valuation. Try again with a new strategy!";
+        desc = `The rival finished ${formatMoney(computerVal - playerVal)} ahead. Try mixing your cards: repeating one card in a year gives diminishing returns.`;
     }
 
     setText("finalResultTitle", title);
@@ -1998,9 +2263,9 @@ function renderFinalStats(finalValue) {
     const ownership = playerEquity();
     const stats = [
         ["Cash", formatMoney(state.cash), state.cash < 0 ? "In debt" : "On hand"],
-        ["Revenue", formatMoney(state.revenue), "Annual"],
+        ["Revenue", formatMoney(state.revenue), "Rival: " + formatMoney(state.rival.revenue)],
         ["Users", formatUsers(state.users), "Customers"],
-        ["Market Share", state.marketShare.toFixed(1) + "%", "Of the market"],
+        ["Market Share", state.marketShare.toFixed(1) + "%", "Rival: " + state.rival.marketShare.toFixed(1) + "%"],
         ["Reputation", String(Math.round(state.reputation)), "Out of 100"],
         ["Your Ownership", formatPercent(ownership), "Stake worth " + formatMoney(finalValue * ownership / 100)],
         ["Cofounder", state.cofounderStatus, state.cofounderName],
@@ -2028,9 +2293,9 @@ function renderFinalStats(finalValue) {
     });
 }
 
-function restartLevel3() {
-    initializeLevel3();
-    showScreen("screen-level3-intro");
+function restartGame() {
+    initializeGame();
+    showScreen("screen-intro");
 }
 
 
@@ -2082,28 +2347,24 @@ function setupGlobalEventListeners() {
     document.addEventListener("click", (event) => {
         const target = event.target;
 
+        retryMusicIfNeeded();
+
         if (target.closest("#btnPlayNow")) {
             startMusic();
-            showScreen("screen-menu");
+            openGame();
         }
 
         if (target.closest("#btnMute")) {
             toggleMute();
         }
 
-        if (target.closest("#btnMenuHome, #btnHome, #btnFundingHome")) {
-            leaveLevel3();
+        if (target.closest("#btnFundingHome, #btnFundingFinishHome")) {
+            leaveGame();
             showScreen("screen-welcome");
         }
 
-        if (target.closest("#btnMenuRefresh, #btnMenu, #btnFundingMenu")) {
-            leaveLevel3();
-            showScreen("screen-menu");
-        }
-
-        if (target.closest("#btnLevel1")) selectLevel(1);
-        if (target.closest("#btnLevel2")) selectLevel(2);
-        if (target.closest("#btnLevel3")) selectLevel(3);
+        const diffBtn = target.closest("[data-difficulty]");
+        if (diffBtn) setDifficulty(diffBtn.getAttribute("data-difficulty"));
 
         if (target.closest("#btnStartFunding")) startFundingSimulator();
         if (target.closest("#btnFundingTech")) chooseIndustry("tech");
@@ -2115,7 +2376,6 @@ function setupGlobalEventListeners() {
 
         if (target.closest("#btnEndYear")) advanceYear();
 
-        if (target.closest("#btnFundingFinishMenu")) showScreen("screen-menu");
-        if (target.closest("#btnFundingPlayAgain")) restartLevel3();
+        if (target.closest("#btnFundingPlayAgain")) restartGame();
     });
 }
